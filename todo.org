@@ -1,0 +1,224 @@
+#+STARTUP: indent
+
+
+* TODO Tonight
+** TODO Push finished tests
+
+Soundcloud tip bot -- because that's way cooler than trading.
+
+* Production Setup
+** TODO Configure postgres
+** TODO Pull from master
+** TODO Fab deploy script
+
+* Soundcloud API
+** DONE Read Mentions
+   CLOSED: [2014-02-08 Sat 12:54]
+** DONE Send Message
+   CLOSED: [2014-02-08 Sat 21:20]
+** DONE Read Messages
+   CLOSED: [2014-02-08 Sat 12:54]
+*** TODO Register command
+*** TODO History command
+*** TODO Withdraw command
+*** TODO Accept command
+*** TODO Reject command
+
+* Wallet Management
+** DONE Initial json based command test
+   CLOSED: [2014-02-13 Thu 23:02]
+** DONE Create new addresses
+   CLOSED: [2014-02-13 Thu 23:02]
+** TODO Detect funds received
+** TODO Send Doge and subtract from user account
+
+* User Management
+** DONE Pretty much I just mean create a model we can use
+   CLOSED: [2014-02-08 Sat 12:54]
+
+* Core functionality (joining together wallet & soundcloud)
+Registered user to registered user
+Registered user to unregistered user
+- Insufficient funds
+- Insufficient funds when unregistered user accepts
+- Unregistered user refuses tip
+
+Will parse & reply to messages, marking them processed
+Will parse & mark mentions as processed
+
+Transfer of doges will happen here
+
+** Process new messages
+
+
+
+* DONE Getting new messages
+  CLOSED: [2014-11-13 Thu 11:36]
+  - State "DONE"       from "TODO"       [2014-11-13 Thu 11:36]
+
+
+* DONE test is_register parser
+** DONE Basic message
+   CLOSED: [2014-11-13 Thu 12:45]
+   - State "DONE"       from "TODO"       [2014-11-13 Thu 12:45]
+
+
+* DONE tests for processing
+  CLOSED: [2014-11-13 Thu 15:04]
+  - State "DONE"       from "TODO"       [2014-11-13 Thu 15:04]
+
+* DONE create new User
+  CLOSED: [2014-11-13 Thu 15:04]
+  - State "DONE"       from "TODO"       [2014-11-13 Thu 15:04]
+
+* DONE get new address from wallet (mock out)
+  CLOSED: [2014-11-13 Thu 15:04]
+  - State "DONE"       from "TODO"       [2014-11-13 Thu 15:04]
+
+
+* DONE test send_message
+  CLOSED: [2014-11-13 Thu 15:10]
+  - State "DONE"       from "TODO"       [2014-11-13 Thu 15:10]
+
+* DONE Configure celery
+  CLOSED: [2014-11-13 Thu 15:43]
+  - State "DONE"       from "TODO"       [2014-11-13 Thu 15:43]
+* DONE Celery worker with reply task
+  CLOSED: [2014-11-13 Thu 16:16]
+  - State "DONE"       from "TODO"       [2014-11-13 Thu 16:16]
+* DONE reply to user with address
+  CLOSED: [2014-11-13 Thu 16:16]
+  - State "DONE"       from "TODO"       [2014-11-13 Thu 16:16]
+
+FUCKING MAJOR LANDMARK IT WORKED
+
+* HOLD don't accidentally message bopeepn
+  - State "HOLD"       from "NEXT"       [2014-11-16 Sun 17:12]
+  - Note taken on [2014-11-14 Fri 09:35] \\
+    Temporary fix by changing name to bobeep2
+
+
+
+* DONE setup logging
+  CLOSED: [2014-11-16 Sun 19:23]
+  - State "DONE"       from "TODO"       [2014-11-16 Sun 19:23]
+  - State "TODO"       from "DONE"       [2014-11-13 Thu 16:59]
+  - State "DONE"       from "TODO"       [2014-11-13 Thu 16:59]
+** DONE message creation logging
+   CLOSED: [2014-11-16 Sun 17:18]
+   - State "DONE"       from "TODO"       [2014-11-16 Sun 17:18]
+** DONE mention creation logging
+   CLOSED: [2014-11-16 Sun 17:16]
+   - State "DONE"       from "TODO"       [2014-11-16 Sun 17:16]
+** DONE logging for address creation
+   CLOSED: [2014-11-16 Sun 17:13]
+   - State "DONE"       from "TODO"       [2014-11-16 Sun 17:13]
+** DONE user creation logging
+   CLOSED: [2014-11-13 Thu 17:38]
+   - State "DONE"       from "DONE"       [2014-11-16 Sun 15:30]
+   - State "DONE"       from "TODO"       [2014-11-13 Thu 17:38]
+** DONE logging for registration reply
+   CLOSED: [2014-11-14 Fri 10:02]
+   - State "DONE"       from "TODO"       [2014-11-14 Fri 10:02]
+
+
+
+
+* DONE Add balance command
+CLOSED: [2014-11-18 Tue 10:19]
+- State "DONE"       from "TODO"       [2014-11-18 Tue 10:19]
+- [X] Add to parses
+  - [X] test added
+  - [X] added to parses
+- [X] Add to tasks
+  - [X] tests added for tasks
+  - [X] added to tasks
+- [X] Add to processing
+  - [X] tests added
+  - [X] added to processings
+- [X] Tested with real message & parse
+
+
+* SOMEDAY Send user doge directly -- not from a mention
+- Note taken on [2014-11-26 Wed 11:25] \\
+  Due to how soundcloud resolves users for messages, I think users
+  would be confused or accidentally tip the wrong person.
+  Bring it back if you can think of a nice way to work around that.
+- [X] is_tip
+  - [X] added to parses
+  - [X] test added
+- [X] parse_tip
+  - [X] added to parses
+  - [X] test added
+- [-] send_notify_of_tip
+  - [X] added to tasks
+  - [ ] tested with real message
+- [ ] pending transaction created
+  - [ ] tested
+- [ ] process_tip called
+- [ ] process_tip
+  - [ ] this is hazy, but let's get to it
+
+* TODO [#A] Change sending messages to not rely on user name
+* TODO Tip via mentions
+- [X] Upgrade mention getting to use new v2 api
+- [X] we need to add a location (where the mention was made)
+- [-] basic tip (as in, not a reply to someone)?
+  - [X] processing mentions
+  - [X] is_tip
+  - [X] balance check
+  - [-] registered user
+    - [X] create transaction
+    - [X] transfer funds
+    - [ ] notify to_user and from_user
+  - [ ] unregistered
+    - [ ] reply with accept to receive this tip msg
+    - [ ] well we've got pending & accepted so we good.
+    - [ ] go over all transactions > 1 week & not accepted & return
+
+* DONE Add to_string methods for objects instead of manually parsing out this shit
+CLOSED: [2014-12-01 Mon 10:47]
+- State "DONE"       from "TODO"       [2014-12-01 Mon 10:47]
+* TODO Tasks are currently synchronous, add delays after testing live
+* TODO Support for tipping specific comments
+* TODO Balance / deposit tracking
+* TODO Withdraw command
+* TODO Add URI field
+* TODO tracking deposits
+- [ ] On deposit detected transfer doge to main wallet and update their balance
+
+* TODO Add history command
+- [ ] Add to parses
+  - [ ] test added
+  - [ ] added to parses
+- [ ] Add to tasks
+  - [ ] tests added for tasks
+  - [ ] added to tasks
+- [ ] Add to processing
+  - [ ] tests added
+  - [ ] added to processings
+- [ ] Tested with real message & parse
+
+
+* TODO Test with matching display name
+
+* System for doge transfer
+- Doge is recieved, balance is updated
+- Transactions after that do not hit the blockchain
+  - Except for withdrawls
+-
+
+
+* TODO Dashboard
+** TODO Tastypie
+** TODO Add models to tastypie
+** TODO Index.html
+** TODO JS files location + grunt
+** TODO scss + compass
+
+
+* TODO Fab deploy
+* TODO move wallet tasks to tasks
+* TODO refactor get_new_mentions
+* TODO Launch checklist
+- [ ] test

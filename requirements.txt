@@ -1,0 +1,18 @@
+Django==1.7.1
+amqp==1.4.6
+anyjson==0.3.3
+billiard==3.3.0.18
+celery==3.1.16
+django-celery==3.1.16
+django-dynamic-fixture==1.8.0
+fudge==1.0.3
+kombu==3.0.23
+mock==1.0.1
+psycopg2==2.5.4
+python-dateutil==2.2
+pytz==2014.9
+requests==2.4.3
+simplejson==3.6.5
+six==1.8.0
+-e git://github.com/bontaq/soundcloud-python.git@faf440ed2befe32a4b21d74089a6524b743bcf26#egg=soundcloud-master
+wsgiref==0.1.2
