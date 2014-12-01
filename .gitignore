@@ -1,3 +1,5 @@
 *.pyc
 packs
 .idea
+debug.log
+dogebote/local_settings.py
