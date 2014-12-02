@@ -158,11 +158,14 @@ class SoundCloudAPI():
         for convo in conversations:
             self.create_conversation(convo)
 
-    def get_user_id(self, profile_name):
+    def get_soundcloud_user(self, user_profile=None, user_id=None):
         """Get the user id from a url / permalink."""
-        url = 'https://soundcloud.com/{profile}'.format(profile=profile_name)
+        if user_id:
+            url = 'https://api.soundcloud.com/users/{user_id}'.format(user_id=user_id)
+        else:
+            url = 'https://soundcloud.com/{profile}'.format(profile=user_profile)
         results = self.client.get('/resolve', url=url)
-        return results.obj['id']
+        return results.obj
 
     def send_message(self, to_user_id, message):
         self.client.post('/me/conversations',
@@ -172,11 +175,11 @@ class SoundCloudAPI():
 
     def update_soundcloud(self):
         self.create_mentions()
-        # self.create_conversations()
-        # for convo_obj in Conversation.objects.filter(needs_update=True):
-        #     try:
-        #         self.create_messages(convo_obj)
-        #         convo_obj.needs_update = False
-        #         convo_obj.save()
-        #     except Exception as e:
-        #         raise e
+        self.create_conversations()
+        for convo_obj in Conversation.objects.filter(needs_update=True):
+            try:
+                self.create_messages(convo_obj)
+                convo_obj.needs_update = False
+                convo_obj.save()
+            except Exception as e:
+                raise e

@@ -9,7 +9,7 @@ soundcloud = SoundCloudAPI()
 
 @task
 def send_welcome(user):
-    msg = "Welcome to dogebot, your deposit address is: {address}".format(
+    msg = "Welcome to dogebot, your deposit address is:\n{address}".format(
         address=user.deposit_address
     )
     try:
@@ -21,7 +21,7 @@ def send_welcome(user):
 
 @task
 def send_already_registered(user):
-    msg = "You've already registered, your deposit address is: {address} and " \
+    msg = "You've already registered, your deposit address is:\n{address}\nand " \
           "your balance is: {balance}".format(
               address=user.deposit_address,
               balance=user.balance)
@@ -42,6 +42,27 @@ def send_balance(user):
                     user.user_name,
                     user.user_id,
                     user.balance.quantize(Decimal("0.00")))
+    except Exception as e:
+        logger.exception(e)
+
+
+@task
+def send_tip_success(from_user_id, to_user_id, amt):
+    from_user = soundcloud.get_soundcloud_user(user_id=from_user_id)
+    to_user = soundcloud.get_soundcloud_user(user_id=to_user_id)
+    quantized_amt = amt.quantize(Decimal("0.00"))
+
+    tip_receiver_msg = "{username} has sent you a tip of {amt} doge".format(
+        username=from_user['username'],
+        amt=quantized_amt
+    )
+    tip_sender_msg = "You successfully tipped {amt} doge to {username}".format(
+        username=to_user['username'],
+        amt=quantized_amt
+    )
+    try:
+        soundcloud.send_message(to_user['id'], tip_receiver_msg)
+        soundcloud.send_message(from_user['id'], tip_sender_msg)
     except Exception as e:
         logger.exception(e)
 

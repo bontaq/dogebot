@@ -8,4 +8,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         soundcloud = SoundCloudAPI()
         soundcloud.update_soundcloud()
-        # soundcloud.create_conversations()
+        soundcloud.create_conversations()

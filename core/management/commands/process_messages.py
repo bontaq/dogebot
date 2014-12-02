@@ -10,3 +10,4 @@ class Command(BaseCommand):
         processor = Processor()
         processor.soundcloud.update_soundcloud()
         processor.process_messages()
+        processor.process_mentions()

@@ -99,6 +99,7 @@ class Processor():
                 amt_to_send = SCParser.parse_mention_tip(mention.message)
                 try:
                     self.process_tip(from_user_id, to_user_id, amt_to_send)
+                    tasks.send_tip_success.delay(from_user_id, to_user_id, amt_to_send)
                 except FromUserNotRegistered:
                     tasks.send_from_user_not_registered()
                 except ToUserNotRegistered:

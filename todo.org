@@ -1,4 +1,5 @@
 #+STARTUP: indent
+#+STARTUP: toggle-truncate-lines
 
 
 * TODO Tonight
@@ -18,9 +19,13 @@ Soundcloud tip bot -- because that's way cooler than trading.
    CLOSED: [2014-02-08 Sat 21:20]
 ** DONE Read Messages
    CLOSED: [2014-02-08 Sat 12:54]
-*** TODO Register command
+*** DONE Register command
+CLOSED: [2014-12-01 Mon 15:50]
+- State "DONE"       from "TODO"       [2014-12-01 Mon 15:50]
 *** TODO History command
 *** TODO Withdraw command
+**** TODO all
+**** TODO some amount
 *** TODO Accept command
 *** TODO Reject command
 
@@ -50,18 +55,14 @@ Transfer of doges will happen here
 
 ** Process new messages
 
-
-
 * DONE Getting new messages
   CLOSED: [2014-11-13 Thu 11:36]
   - State "DONE"       from "TODO"       [2014-11-13 Thu 11:36]
-
 
 * DONE test is_register parser
 ** DONE Basic message
    CLOSED: [2014-11-13 Thu 12:45]
    - State "DONE"       from "TODO"       [2014-11-13 Thu 12:45]
-
 
 * DONE tests for processing
   CLOSED: [2014-11-13 Thu 15:04]
@@ -74,7 +75,6 @@ Transfer of doges will happen here
 * DONE get new address from wallet (mock out)
   CLOSED: [2014-11-13 Thu 15:04]
   - State "DONE"       from "TODO"       [2014-11-13 Thu 15:04]
-
 
 * DONE test send_message
   CLOSED: [2014-11-13 Thu 15:10]
@@ -96,8 +96,6 @@ FUCKING MAJOR LANDMARK IT WORKED
   - State "HOLD"       from "NEXT"       [2014-11-16 Sun 17:12]
   - Note taken on [2014-11-14 Fri 09:35] \\
     Temporary fix by changing name to bobeep2
-
-
 
 * DONE setup logging
   CLOSED: [2014-11-16 Sun 19:23]
@@ -121,9 +119,6 @@ FUCKING MAJOR LANDMARK IT WORKED
    CLOSED: [2014-11-14 Fri 10:02]
    - State "DONE"       from "TODO"       [2014-11-14 Fri 10:02]
 
-
-
-
 * DONE Add balance command
 CLOSED: [2014-11-18 Tue 10:19]
 - State "DONE"       from "TODO"       [2014-11-18 Tue 10:19]
@@ -137,7 +132,6 @@ CLOSED: [2014-11-18 Tue 10:19]
   - [X] tests added
   - [X] added to processings
 - [X] Tested with real message & parse
-
 
 * SOMEDAY Send user doge directly -- not from a mention
 - Note taken on [2014-11-26 Wed 11:25] \\
@@ -167,15 +161,18 @@ CLOSED: [2014-11-18 Tue 10:19]
   - [X] processing mentions
   - [X] is_tip
   - [X] balance check
-  - [-] registered user
+  - [X] registered user
     - [X] create transaction
     - [X] transfer funds
-    - [ ] notify to_user and from_user
+    - [X] notify to_user and from_user
   - [ ] unregistered
     - [ ] reply with accept to receive this tip msg
     - [ ] well we've got pending & accepted so we good.
     - [ ] go over all transactions > 1 week & not accepted & return
 
+* DONE Landmark: registered user -> registered user tip with mention on track
+CLOSED: [2014-12-02 Tue 06:32]
+- State "DONE"       from "TODO"       [2014-12-02 Tue 06:32]
 * DONE Add to_string methods for objects instead of manually parsing out this shit
 CLOSED: [2014-12-01 Mon 10:47]
 - State "DONE"       from "TODO"       [2014-12-01 Mon 10:47]
@@ -199,15 +196,14 @@ CLOSED: [2014-12-01 Mon 10:47]
   - [ ] added to processings
 - [ ] Tested with real message & parse
 
-
 * TODO Test with matching display name
+- Note taken on [2014-12-01 Mon 15:44] \\
+  Yep, sending messages matches on display name.  This won't do, could easily send messages to the wrong user
 
 * System for doge transfer
 - Doge is recieved, balance is updated
 - Transactions after that do not hit the blockchain
   - Except for withdrawls
--
-
 
 * TODO Dashboard
 ** TODO Tastypie
@@ -216,9 +212,10 @@ CLOSED: [2014-12-01 Mon 10:47]
 ** TODO JS files location + grunt
 ** TODO scss + compass
 
-
 * TODO Fab deploy
 * TODO move wallet tasks to tasks
-* TODO refactor get_new_mentions
+* DONE refactor get_new_mentions
+CLOSED: [2014-12-01 Mon 15:43]
+- State "DONE"       from "TODO"       [2014-12-01 Mon 15:43]
 * TODO Launch checklist
 - [ ] test
