@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+import pytz
 from django.test import TestCase
 from mock import patch
 from django_dynamic_fixture import G
@@ -94,8 +95,30 @@ class ProcessTests(TestCase):
         mention_after = Mention.objects.get(id=mention.id)
         self.assertTrue(mention_after.processed)
 
-    def test_proccess_mention_pending_transaction(self):
-        pass
+    @patch('core.processing.tasks')
+    @patch('core.tasks.soundcloud')
+    def test_tip_success_called(self, mock_soundcloud, mock_tasks):
+        user_a = G(User, balance=Decimal(500))
+        user_b = G(User, balance=Decimal(0))
+        G(Mention,
+          processed=False,
+          message='@dogebot tip 100',
+          from_user_id=user_a.user_id,
+          to_user_id=user_b.user_id)
+        self.processor.process_mentions()
+        assert mock_tasks.send_tip_success.delay.called
+
+    @patch('core.tasks.soundcloud')
+    def test_proccess_mention_pending_transaction(self, fake_soundcloud):
+        user_a = G(User, balance=Decimal(100))
+        G(Mention,
+          message='@dogebot tip 50',
+          from_user_id=user_a.user_id,
+          to_user_id='test')
+        self.processor.process_mentions()
+        trans = Transaction.objects.get(from_user=user_a, to_user_temp_id='test')
+        self.assertFalse(trans.accepted)
+        self.assertTrue(trans.pending)
 
     def test_process_tip_not_enough_balance(self):
         user_a = G(User, balance=Decimal(100))
@@ -112,3 +135,48 @@ class ProcessTests(TestCase):
         user_a = G(User, balance=Decimal(100))
         with self.assertRaises(ToUserNotRegistered):
             self.processor.process_tip(user_a.user_id, 'Z', Decimal(500))
+
+    def test_handle_to_user_not_registered(self):
+        from_user = G(User, balance=Decimal(100))
+        self.processor.handle_to_user_not_registered(from_user.user_id, 'ZZZ', Decimal(50))
+        from_user_after = User.objects.get(user_id=from_user.user_id)
+        self.assertEqual(from_user_after.balance, 50)
+        trans = Transaction.objects.get(to_user_temp_id='ZZZ')
+        self.assertTrue(trans.pending)
+        self.assertFalse(trans.accepted)
+        self.assertEqual(trans.amount, Decimal(50))
+
+    def test_process_transaction(self):
+        from_user = G(User, balance=Decimal(100))
+        trans = G(
+            Transaction,
+            timestamp=datetime.now(pytz.utc),
+            pending=True,
+            amount=Decimal(50),
+            from_user=from_user,
+            to_user=None,
+            parent_transaction=None,
+            to_user_temp_id='Test'
+        )
+        to_user = G(User, balance=Decimal(0), user_id='Test')
+        self.processor.process_transactions()
+        to_user = User.objects.get(user_id=to_user.user_id)
+        self.assertEqual(to_user.balance, Decimal(50))
+        trans = Transaction.objects.get(pk=trans.pk)
+        self.assertEqual(trans.to_user, to_user)
+        self.assertFalse(trans.pending)
+        self.assertTrue(trans.accepted)
+
+    def test_expired_tip(self):
+        from_user = G(User, balance=Decimal(100))
+        trans = G(
+            Transaction,
+            timestamp=datetime.now(pytz.utc) - timedelta(7),
+            pending=True,
+            amount=Decimal(50),
+            from_user=from_user,
+            to_user=None,
+            parent_transaction=None,
+            to_user_temp_id='Test'
+        )
+        self.processor.process_transactions()

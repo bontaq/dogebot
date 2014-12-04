@@ -81,17 +81,19 @@ class User(models.Model):
 class Transaction(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     from_user = models.ForeignKey(User, related_name='transaction_from_users')
-    to_user = models.ForeignKey(User, related_name='transaction_to_users')
+    to_user = models.ForeignKey(User, related_name='transaction_to_users', null=True)
+    to_user_temp_id = models.CharField(max_length=24, null=True)  # used for when the to_user is not registered
     amount = models.DecimalField(max_digits=50, decimal_places=8)
     pending = models.BooleanField(default=True)
     accepted = models.BooleanField(default=False)
+    parent_transaction = models.ForeignKey('Transaction', null=True)
 
     def __str__(self):
-        return "{timestamp}, from:{from_user}, to:{to_user}, amt".format(
+        return "{timestamp}, from:{from_user}, to:{to_user}, {amt}".format(
             timestamp=self.timestamp,
             from_user=self.from_user.user_id,
             to_user=self.to_user.user_id,
-            amt=amount
+            amt=self.amount
         )
 
 

@@ -8,6 +8,12 @@ def is_register(message):
     return False
 
 
+def is_accept(message):
+    if message.strip().lower() == 'accept':
+        return True
+    return False
+
+
 def is_get_balance(message):
     if re.match('^balance$|^get\s?balance$', message.strip(), re.IGNORECASE):
         return True

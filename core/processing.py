@@ -1,9 +1,12 @@
+from django.conf import settings
+from datetime import datetime
+import pytz
+import logging
 from core.models import Message, User, Transaction, Mention
 from core.soundcloud_api import SoundCloudAPI
 import core.soundcloud_parses as SCParser
 from core.wallet import WalletAPI
 from core import tasks
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +43,7 @@ class Processor():
     def process_messages(self):
         for message in Message.objects.filter(processed=False):
             text = message.message
-            if SCParser.is_register(text):
+            if SCParser.is_register(text) or SCParser.is_accept(text):
                 user, created = self.register_user(message)
                 if created:
                     tasks.send_welcome.delay(user)
@@ -74,7 +77,7 @@ class Processor():
         """
         :param from_user: User
         :param to_user: User
-        :param amt: int or float
+        :param amt: Decimal
         """
         from_user.balance -= amt
         to_user.balance += amt
@@ -90,6 +93,18 @@ class Processor():
         trans.save()
         return trans
 
+    def handle_to_user_not_registered(self, from_user_id, to_user_id, amt):
+        Transaction(
+            from_user=User.objects.get(user_id=from_user_id),
+            to_user_temp_id=to_user_id,
+            amount=amt,
+            pending=True,
+            accepted=False,
+        ).save()
+        from_user = User.objects.get(user_id=from_user_id)
+        from_user.balance -= amt
+        from_user.save()
+
     def process_mentions(self):
         """Goes through unprocessed mentions and manages those which are tips"""
         for mention in Mention.objects.filter(processed=False):
@@ -103,17 +118,11 @@ class Processor():
                 except FromUserNotRegistered:
                     tasks.send_from_user_not_registered(from_user_id)
                 except ToUserNotRegistered:
-                    Transaction(
-                        from_user=from_user_id,
-                        to_user=to_user_id,
-                        amount=amt_to_send,
-                        pending=True,
-                        accepted=False
-                    ).save()
-                    tasks.send_notify_from_user_pending_tip(from_user_id, to_user_id, amt)
+                    self.handle_to_user_not_registered(from_user_id, to_user_id, amt_to_send)
+                    tasks.send_notify_from_user_pending_tip(from_user_id, to_user_id, amt_to_send)
                     tasks.send_notify_of_tip(from_user_id, to_user_id)
                 except BadBalance:
-                    tasks.send_bad_balance(from_user_id)
+                    tasks.send_bad_balance(from_user_id, to_user_id, amt)
             mention.processed = True
             mention.save()
 
@@ -134,4 +143,34 @@ class Processor():
         self.transfer_funds(from_user, to_user, amt)
 
     def process_transactions(self):
-        pass
+        """Go through pending transactions and see if the recipient has accepted, then complete transaction.
+        If the request is over 3 days old return funds and inform the tipper.
+        """
+        now = datetime.now(pytz.utc)
+        for transaction in Transaction.objects.filter(pending=True):
+            if (transaction.timestamp - now).seconds > settings.TIP_EXPIRY:
+                transaction.from_user.balance += transaction.amt
+                transaction.pending = False
+                transaction.from_user.save()
+                transaction.save()
+                logger.info('Refunded pending tip, from_user: %s, to_user: %s, amt: %s',
+                            transaction.from_user.user_id,
+                            transaction.to_user_temp_id,
+                            transaction.amount.quantize(Decimal('0.00')))
+                # notify refunded
+            else:
+                try:
+                    to_user = User.objects.get(user_id=transaction.to_user_temp_id)
+                    to_user.balance += transaction.amount
+                    to_user.save()
+                    transaction.to_user = to_user
+                    transaction.pending = False
+                    transaction.accepted = True
+                    transaction.save()
+                    logger.info('Completed pending tip, from_user: %s, to_user: %s, amt: %s',
+                                transaction.from_user.user_id,
+                                to_user.user_id,
+                                transaction.amount.quantize(Decimal('0.00')))
+                    tasks.send_tip_success.delay(transaction.from_user.user_id, to_user.user_id, transaction.amount)
+                except User.DoesNotExist:
+                    pass

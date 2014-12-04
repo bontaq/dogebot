@@ -16,6 +16,11 @@ class SoundCloudParserTests(TestCase):
         self.assertFalse(SCParser.is_register('regme'))
         self.assertFalse(SCParser.is_register('\n'))
 
+    def test_accept(self):
+        self.assertTrue(SCParser.is_accept('accept'))
+        self.assertTrue(SCParser.is_accept('ACCEPT'))
+        self.assertTrue(SCParser.is_accept(' ACCEPT  \n'))
+
     def test_balance(self):
         self.assertTrue(SCParser.is_get_balance('balance'))
         self.assertTrue(SCParser.is_get_balance('BALANCE'))
