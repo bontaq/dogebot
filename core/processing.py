@@ -101,13 +101,19 @@ class Processor():
                     self.process_tip(from_user_id, to_user_id, amt_to_send)
                     tasks.send_tip_success.delay(from_user_id, to_user_id, amt_to_send)
                 except FromUserNotRegistered:
-                    tasks.send_from_user_not_registered()
+                    tasks.send_from_user_not_registered(from_user_id)
                 except ToUserNotRegistered:
-                    # create pending transaction
-                    tasks.send_notify_from_user_pending_tip()
-                    tasks.send_notify_of_tip()
+                    Transaction(
+                        from_user=from_user_id,
+                        to_user=to_user_id,
+                        amount=amt_to_send,
+                        pending=True,
+                        accepted=False
+                    ).save()
+                    tasks.send_notify_from_user_pending_tip(from_user_id, to_user_id, amt)
+                    tasks.send_notify_of_tip(from_user_id, to_user_id)
                 except BadBalance:
-                    tasks.send_bad_balance()
+                    tasks.send_bad_balance(from_user_id)
             mention.processed = True
             mention.save()
 

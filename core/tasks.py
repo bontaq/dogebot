@@ -69,12 +69,14 @@ def send_tip_success(from_user_id, to_user_id, amt):
 
 @task
 def send_notify_of_tip(from_user, to_user):
+    from_user = soundcloud.get_soundcloud_user(user_id=from_user_id)
+    to_user = soundcloud.get_soundcloud_user(user_id=to_user_id)
     msg = "{from_user} would like to send you a dogecoin tip, reply with 'accept' to " \
           "register and accept this tip.".format(
-              from_user=from_user.user_name
+              from_user=from_user['username']
           )
     try:
-        soundcloud.send_message(to_user.user_id, msg)
+        soundcloud.send_message(to_user['id'], msg)
         logger.info('Reply: asked user to register.  from_user: {from_user}, to_user: {to_user}',
                     from_user,
                     to_user)
@@ -83,10 +85,24 @@ def send_notify_of_tip(from_user, to_user):
 
 
 @task
-def send_from_user_not_registered():
+def send_notify_from_user_pending_tip(from_user, to_user, amt):
+    from_user = soundcloud.get_soundcloud_user(user_id=from_user_id)
+    to_user = soundcloud.get_soundcloud_user(user_id=to_user_id)
+    msg = ("You sent {to_user} a tip of {amt}, they aren't current registered but I'll "
+           "let you know if they accept the tip.").format(
+               to_user=to_user['username'],
+               amt=amt.quantize(Decimal("0.00")))
+    try:
+        pass
+    except Exception as e:
+        logger.exception(e)
+
+
+@task
+def send_from_user_not_registered(from_user_id):
     pass
 
 
 @task
-def send_bad_balance():
+def send_bad_balance(from_user_id):
     pass
