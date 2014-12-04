@@ -1,5 +1,6 @@
 from celery import task
 from core.soundcloud_api import SoundCloudAPI
+from core.models import User
 from decimal import Decimal
 import logging
 
@@ -68,14 +69,16 @@ def send_tip_success(from_user_id, to_user_id, amt):
 
 
 @task
-def send_notify_of_tip(from_user, to_user):
+def send_notify_of_tip(from_user_id, to_user_id):
+    from_user = soundcloud.get_soundcloud_user(user_id=from_user_id)
+    to_user = soundcloud.get_soundcloud_user(user_id=to_user_id)
     msg = "{from_user} would like to send you a dogecoin tip, reply with 'accept' to " \
           "register and accept this tip.".format(
-              from_user=from_user.user_name
+              from_user=from_user['username']
           )
     try:
-        soundcloud.send_message(to_user.user_id, msg)
-        logger.info('Reply: asked user to register.  from_user: {from_user}, to_user: {to_user}',
+        soundcloud.send_message(to_user['id'], msg)
+        logger.info('Reply: asked user to register.  from_user: %s, to_user: %s',
                     from_user,
                     to_user)
     except Exception as e:
@@ -83,10 +86,54 @@ def send_notify_of_tip(from_user, to_user):
 
 
 @task
-def send_from_user_not_registered():
-    pass
+def send_notify_from_user_pending_tip(from_user_id, to_user_id, amt):
+    from_user = soundcloud.get_soundcloud_user(user_id=from_user_id)
+    to_user = soundcloud.get_soundcloud_user(user_id=to_user_id)
+    msg = ("You sent {to_user} a tip of {amt}, they aren't current registered but I'll "
+           "let you know if they accept the tip.").format(
+               to_user=to_user['username'],
+               amt=amt.quantize(Decimal("0.00")))
+    try:
+        soundcloud.send_message(to_user['id'], msg)
+    except Exception as e:
+        logger.exception(e)
 
 
 @task
-def send_bad_balance():
-    pass
+def send_from_user_tip_refunded(from_user, to_user_id, amt):
+    to_user = soundcloud.get_soundcloud_user(user_id=to_user_id)
+    msg = ("You tried to tip {to_user}, but they did not accept in time.  "
+           "{amt} doge has been refunded to you").format(
+               to_user=to_user['username'],
+               amt=amt.quantize(Decimal('0.00')))
+    try:
+        soundcloud.send_message(to_user['id'], msg)
+    except Exception as e:
+        logger.exception(e)
+
+
+@task
+def send_from_user_not_registered(from_user_id):
+    msg = ("You tried to tip someone but have not registered.  Respond with "
+           "'register' if you would like to register.")
+    try:
+        soundcloud.send_message(to_user['id'], msg)
+        logger.info('Notified %s that they are not registered', from_user_id)
+    except Exception as e:
+        logger.exception(e)
+
+
+@task
+def send_bad_balance(from_user_id, to_user_id, amt):
+    to_user = soundcloud.get_soundcloud_user(user_id=to_user_id)
+    from_user = User.objects.get(user_id=from_user_id)
+    msg = ("You tried to send a tip of {amt} doges to {user}, but your balance is {balance} doges").format(
+        amt=amt.quantize(Decimal("0.00")),
+        user=to_user['username'],
+        balance=from_user.balance.quantize(Decimal("0.00"))
+    )
+    try:
+        soundcloud.send_message(from_user_id, msg)
+        logger.info('Notified %s that they do not have sufficient balance', from_user_id)
+    except Exception as e:
+        logger.exception(e)

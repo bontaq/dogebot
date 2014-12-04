@@ -1,5 +1,4 @@
 #+STARTUP: indent
-#+STARTUP: toggle-truncate-lines
 
 
 * TODO Tonight
@@ -153,7 +152,7 @@ CLOSED: [2014-11-18 Tue 10:19]
 - [ ] process_tip
   - [ ] this is hazy, but let's get to it
 
-* TODO [#A] Change sending messages to not rely on user name
+* TODO Change sending messages to not rely on user name
 * TODO Tip via mentions
 - [X] Upgrade mention getting to use new v2 api
 - [X] we need to add a location (where the mention was made)
@@ -165,25 +164,25 @@ CLOSED: [2014-11-18 Tue 10:19]
     - [X] create transaction
     - [X] transfer funds
     - [X] notify to_user and from_user
-  - [ ] unregistered
-    - [ ] reply with accept to receive this tip msg
-    - [ ] well we've got pending & accepted so we good.
-    - [ ] go over all transactions > 1 week & not accepted & return
+  - [X] unregistered
+    - [X] reply with accept to receive this tip msg
+    - [X] well we've got pending & accepted so we good.
+    - [X] tested with real mention
+  - [X] Send bad balance message
+  - [-] accept route
+    - [X] process messages is_accept
+    - [X] look for any pending transaction
+      - [X] mark each complete
+      - [X] transfer funds
+    - [ ] send success message to newly registered user
+    - [ ] send success message to from user that their tip was accepted
+  - [ ] go over all transactions > 1 week & not accepted & return
 
-* DONE Landmark: registered user -> registered user tip with mention on track
-CLOSED: [2014-12-02 Tue 06:32]
-- State "DONE"       from "TODO"       [2014-12-02 Tue 06:32]
-* DONE Add to_string methods for objects instead of manually parsing out this shit
-CLOSED: [2014-12-01 Mon 10:47]
-- State "DONE"       from "TODO"       [2014-12-01 Mon 10:47]
-* TODO Tasks are currently synchronous, add delays after testing live
-* TODO Support for tipping specific comments
-* TODO Balance / deposit tracking
+* TODO Add module name in front of log
+* TODO Update pending tip success message
+* TODO Add list of commands to welcome message
+* TODO Tracking deposits
 * TODO Withdraw command
-* TODO Add URI field
-* TODO tracking deposits
-- [ ] On deposit detected transfer doge to main wallet and update their balance
-
 * TODO Add history command
 - [ ] Add to parses
   - [ ] test added
@@ -195,6 +194,23 @@ CLOSED: [2014-12-01 Mon 10:47]
   - [ ] tests added
   - [ ] added to processings
 - [ ] Tested with real message & parse
+
+* TODO Fix celery tasks
+** TODO tasks auth expiring
+** TODO better handling of failed tasks
+** TODO tasks are currently synchronous, add delays after testing live
+* TODO Only set processed to true if message to user has been sent?
+* TODO Improve welcome message
+
+* DONE Landmark: registered user -> registered user tip with mention on track
+CLOSED: [2014-12-02 Tue 06:32]
+- State "DONE"       from "TODO"       [2014-12-02 Tue 06:32]
+* DONE Add to_string methods for objects instead of manually parsing out this shit
+CLOSED: [2014-12-01 Mon 10:47]
+- State "DONE"       from "TODO"       [2014-12-01 Mon 10:47]
+* TODO Support for tipping specific comments
+* TODO Balance / deposit tracking
+* TODO Add URI field
 
 * TODO Test with matching display name
 - Note taken on [2014-12-01 Mon 15:44] \\

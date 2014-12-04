@@ -2,6 +2,7 @@ import core.soundcloud_parses as SCParser
 from core.models import Message
 from mock import patch, MagicMock
 from django.test import TestCase
+from decimal import Decimal
 
 
 class SoundCloudParserTests(TestCase):
@@ -14,6 +15,11 @@ class SoundCloudParserTests(TestCase):
         self.assertFalse(SCParser.is_register(''))
         self.assertFalse(SCParser.is_register('regme'))
         self.assertFalse(SCParser.is_register('\n'))
+
+    def test_accept(self):
+        self.assertTrue(SCParser.is_accept('accept'))
+        self.assertTrue(SCParser.is_accept('ACCEPT'))
+        self.assertTrue(SCParser.is_accept(' ACCEPT  \n'))
 
     def test_balance(self):
         self.assertTrue(SCParser.is_get_balance('balance'))
@@ -45,8 +51,15 @@ class SoundCloudParserTests(TestCase):
         self.assertEqual(user, 'user')
         self.assertEqual(amt, '10.50')
 
+    def test_is_mention_tip(self):
+        self.assertTrue(SCParser.is_mention_tip('@dogebot: tip 100'))
+        self.assertTrue(SCParser.is_mention_tip('@dogebot tip 100'))
+
     def test_parse_mention_tip(self):
         amt = SCParser.parse_mention_tip('@dogebot tip 100')
-        self.assertEqual(amt, '100')
+        self.assertEqual(amt, Decimal('100'))
         amt = SCParser.parse_mention_tip('@dogebot tip 10.50')
-        self.assertEqual(amt, '10.50')
+        self.assertEqual(amt, Decimal('10.50'))
+
+    def test_parse_mention_tip_with_colon(self):
+        self.assertEqual(SCParser.parse_mention_tip('@dogebot: tip 100'), 100)

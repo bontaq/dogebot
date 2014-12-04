@@ -8,6 +8,12 @@ def is_register(message):
     return False
 
 
+def is_accept(message):
+    if message.strip().lower() == 'accept':
+        return True
+    return False
+
+
 def is_get_balance(message):
     if re.match('^balance$|^get\s?balance$', message.strip(), re.IGNORECASE):
         return True
@@ -31,11 +37,11 @@ def parse_tip(message):
 
 
 def is_mention_tip(message):
-    if re.match('^@dogebot: tip (\d+)$', message.strip(), re.IGNORECASE):
+    if re.match('^@dogebot:? tip (\d+)$', message.strip(), re.IGNORECASE):
         return True
     return False
 
 
 def parse_mention_tip(message):
-    match = re.match('^@dogebot: tip (\d+\.\d+|\d+)$', message.strip(), re.IGNORECASE)
+    match = re.match('^@dogebot:? tip (\d+\.\d+|\d+)$', message.strip(), re.IGNORECASE)
     return Decimal(match.group(1))
