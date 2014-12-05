@@ -2,6 +2,7 @@ from django.conf import settings
 from datetime import datetime
 import pytz
 import logging
+from decimal import Decimal
 from core.models import Message, User, Transaction, Mention
 from core.soundcloud_api import SoundCloudAPI
 import core.soundcloud_parses as SCParser

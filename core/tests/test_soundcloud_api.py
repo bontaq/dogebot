@@ -7,12 +7,15 @@ from django.test import TestCase
 
 
 class SoundCloudTests(TestCase):
+    def setUp(self):
+        SoundCloudAPI.client = None
+
     @patch('core.soundcloud_api.soundcloud.Client')
     def test_get_mentions(self, mock_soundcloud):
         results = [
             {
                 'collection': [soundcloud_mention_fixture[0]],
-                'next_href': 'https://api.soundcloud.com/e1/me/activities.json?limit=1&cursor=41d51698-0e80-0000-68c4-d0a603b982a9'
+                'next_href': 'https://api.soundcloud.com/e1/me/activities.json?limi2t=1&cursor=41d51698-0e80-0000-68c4-d0a603b982a9'
             }, {
                 'collection': [],
                 'next_href': ''
@@ -24,7 +27,6 @@ class SoundCloudTests(TestCase):
         m2.obj = results[1]
         mocks = [m1, m2]
         mock_soundcloud.return_value.get.side_effect = mocks
-
         soundcloud = SoundCloudAPI()
         res = [r for r in soundcloud.get_new_mentions()]
         self.assertEqual(len(res), 1)
@@ -63,14 +65,14 @@ class SoundCloudTests(TestCase):
         mentions = Mention.objects.all()
         self.assertEqual(len(mentions), 2)
 
-        self.assertEqual(mentions[0].user_name, 'Bonbontaq')
-        self.assertEqual(mentions[0].user_id, '6924356')
-        self.assertEqual(mentions[0].message, '@dogebot: test')
+        self.assertEqual(mentions[0].from_user_name, '666robobo777')
+        self.assertEqual(mentions[0].from_user_id, '123577402')
+        self.assertEqual(mentions[0].message, '@dogebot: tip 10')
         self.assertFalse(mentions[0].processed)
 
-        self.assertEqual(mentions[1].user_name, 'dogebot')
-        self.assertEqual(mentions[1].user_id, '77871924')
-        self.assertEqual(mentions[1].message, '@dogebot: testtest')
+        self.assertEqual(mentions[1].from_user_name, '666robobo777')
+        self.assertEqual(mentions[1].from_user_id, '123577402')
+        self.assertEqual(mentions[1].message, '@dogebot: tip 20')
         self.assertFalse(mentions[1].processed)
 
     @patch('core.soundcloud_api.soundcloud.Client')
@@ -127,8 +129,7 @@ class SoundCloudTests(TestCase):
     def test_conversation_from_system(self, mock_soundcloud):
         soundcloud = SoundCloudAPI()
         soundcloud.create_conversation(soundcloud_conversation_fixture[2])
-        convo = Conversation.objects.get(id=1)
-        self.assertEqual(convo.user_name, 'system')
+        convo = Conversation.objects.get(user_name='system')
         self.assertEqual(convo.user_id, 'system')
 
     @patch('core.soundcloud_api.soundcloud.Client')
@@ -152,14 +153,6 @@ class SoundCloudTests(TestCase):
 
     # def test_create_new_messages(self):
     #     pass
-
-    # @patch('core.soundcloud_api.SoundCloudAPI.get_conversations')
-    # @patch('core.soundcloud_api.SoundCloudAPI.get_messages')
-    # def test_create_new_conversations(self, mock_messages, mock_conversation):
-    #     mock_conversation.return_value = soundcloud_conversation_fixture
-    #     mock_messages.return_value = soundcloud_message_fixture
-    #     soundcloud = SoundCloudAPI()
-    #     soundcloud.create_conversations()
 
     # def test_get_user_id(self):
     #     soundcloud = SoundCloudAPI()

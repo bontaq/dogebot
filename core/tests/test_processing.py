@@ -3,9 +3,9 @@ import pytz
 from django.test import TestCase
 from mock import patch
 from django_dynamic_fixture import G
+from core.models import Conversation, Message, User, Transaction, Mention
 from core.processing import (Processor, BadBalance, FromUserNotRegistered,
                              ToUserNotRegistered)
-from core.models import Conversation, Message, User, Transaction, Mention
 from decimal import Decimal
 
 
@@ -96,7 +96,7 @@ class ProcessTests(TestCase):
         self.assertTrue(mention_after.processed)
 
     @patch('core.processing.tasks')
-    @patch('core.tasks.soundcloud')
+    @patch('core.tasks')
     def test_tip_success_called(self, mock_soundcloud, mock_tasks):
         user_a = G(User, balance=Decimal(500))
         user_b = G(User, balance=Decimal(0))
@@ -108,8 +108,8 @@ class ProcessTests(TestCase):
         self.processor.process_mentions()
         assert mock_tasks.send_tip_success.delay.called
 
-    @patch('core.tasks.soundcloud')
-    def test_proccess_mention_pending_transaction(self, fake_soundcloud):
+    @patch('core.tasks.SoundCloudAPI')
+    def test_proccess_mention_pending_transaction(self, mock_tasks):
         user_a = G(User, balance=Decimal(100))
         G(Mention,
           message='@dogebot tip 50',
