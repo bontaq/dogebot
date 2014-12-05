@@ -10,20 +10,22 @@ logger = logging.getLogger(__name__)
 
 
 class SoundCloudAPI():
+    client = None
+    user_id = settings.SOUNDCLOUD_USER_ID
+
     def __init__(self):
-        self.client = soundcloud.Client(
-            client_id=settings.SOUNDCLOUD_CLIENT_ID,
-            client_secret=settings.SOUNDCLOUD_CLIENT_SECRET,
-            username=settings.SOUNDCLOUD_USERNAME,
-            password=settings.SOUNDCLOUD_PASSWORD
-        )
-        self.user_id = settings.SOUNDCLOUD_USER_ID
+        if not self.client:
+            SoundCloudAPI.client = soundcloud.Client(
+                client_id=settings.SOUNDCLOUD_CLIENT_ID,
+                client_secret=settings.SOUNDCLOUD_CLIENT_SECRET,
+                username=settings.SOUNDCLOUD_USERNAME,
+                password=settings.SOUNDCLOUD_PASSWORD
+            )
 
     def get_new_mentions(self):
         """Returns a generator for new mentions -- stops when we encounter a mention w/
         the latest uuid we already have stored.  Note: the API call is not documented, so
         keep an eye on this."""
-
         url = '/activities'
         try:
             uuid = Mention.objects.latest('timestamp').uuid
@@ -33,7 +35,6 @@ class SoundCloudAPI():
         curr_uuid = None
         while curr_uuid is None or curr_uuid != uuid:
             res = self.client.get(url, use_v2=True)
-
             res_obj = res.obj
             collection = res_obj['collection']
             next_href = res_obj.get('next_href')

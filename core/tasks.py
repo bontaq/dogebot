@@ -5,11 +5,11 @@ from decimal import Decimal
 import logging
 
 logger = logging.getLogger(__name__)
-soundcloud = SoundCloudAPI()
 
 
 @task
 def send_welcome(user):
+    soundcloud = SoundCloudAPI()
     msg = "Welcome to dogebot, your deposit address is:\n{address}".format(
         address=user.deposit_address
     )
@@ -22,6 +22,7 @@ def send_welcome(user):
 
 @task
 def send_already_registered(user):
+    soundcloud = SoundCloudAPI()
     msg = "You've already registered, your deposit address is:\n{address}\nand " \
           "your balance is: {balance}".format(
               address=user.deposit_address,
@@ -35,6 +36,7 @@ def send_already_registered(user):
 
 @task
 def send_balance(user):
+    soundcloud = SoundCloudAPI()
     msg = "Your balance is: {balance} doges".format(
         balance=user.balance.quantize(Decimal("0.00")))
     try:
@@ -49,6 +51,7 @@ def send_balance(user):
 
 @task
 def send_tip_success(from_user_id, to_user_id, amt):
+    soundcloud = SoundCloudAPI()
     from_user = soundcloud.get_soundcloud_user(user_id=from_user_id)
     to_user = soundcloud.get_soundcloud_user(user_id=to_user_id)
     quantized_amt = amt.quantize(Decimal("0.00"))
@@ -70,6 +73,7 @@ def send_tip_success(from_user_id, to_user_id, amt):
 
 @task
 def send_notify_of_tip(from_user_id, to_user_id):
+    soundcloud = SoundCloudAPI()
     from_user = soundcloud.get_soundcloud_user(user_id=from_user_id)
     to_user = soundcloud.get_soundcloud_user(user_id=to_user_id)
     msg = "{from_user} would like to send you a dogecoin tip, reply with 'accept' to " \
@@ -87,6 +91,7 @@ def send_notify_of_tip(from_user_id, to_user_id):
 
 @task
 def send_notify_from_user_pending_tip(from_user_id, to_user_id, amt):
+    soundcloud = SoundCloudAPI()
     from_user = soundcloud.get_soundcloud_user(user_id=from_user_id)
     to_user = soundcloud.get_soundcloud_user(user_id=to_user_id)
     msg = ("You sent {to_user} a tip of {amt}, they aren't current registered but I'll "
@@ -101,6 +106,7 @@ def send_notify_from_user_pending_tip(from_user_id, to_user_id, amt):
 
 @task
 def send_from_user_tip_refunded(from_user, to_user_id, amt):
+    soundcloud = SoundCloudAPI()
     to_user = soundcloud.get_soundcloud_user(user_id=to_user_id)
     msg = ("You tried to tip {to_user}, but they did not accept in time.  "
            "{amt} doge has been refunded to you").format(
@@ -114,6 +120,7 @@ def send_from_user_tip_refunded(from_user, to_user_id, amt):
 
 @task
 def send_from_user_not_registered(from_user_id):
+    soundcloud = SoundCloudAPI()
     msg = ("You tried to tip someone but have not registered.  Respond with "
            "'register' if you would like to register.")
     try:
@@ -125,6 +132,7 @@ def send_from_user_not_registered(from_user_id):
 
 @task
 def send_bad_balance(from_user_id, to_user_id, amt):
+    soundcloud = SoundCloudAPI()
     to_user = soundcloud.get_soundcloud_user(user_id=to_user_id)
     from_user = User.objects.get(user_id=from_user_id)
     msg = ("You tried to send a tip of {amt} doges to {user}, but your balance is {balance} doges").format(
