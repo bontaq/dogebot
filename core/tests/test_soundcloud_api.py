@@ -1,9 +1,10 @@
 from core.soundcloud_api import SoundCloudAPI
-from core.models import Conversation, Mention
+from core.models import Conversation, Mention, Message
 from core.tests.fixture import (soundcloud_conversation_fixture, soundcloud_message_fixture,
                                 soundcloud_mention_fixture)
 from mock import patch, MagicMock
 from django.test import TestCase
+from django_dynamic_fixture import G
 
 
 class SoundCloudTests(TestCase):
@@ -31,9 +32,38 @@ class SoundCloudTests(TestCase):
         res = [r for r in soundcloud.get_new_mentions()]
         self.assertEqual(len(res), 1)
 
-    # @patch('core.soundcloud_api.soundcloud.Client')
-    # def test_already_existing_mention(self, mock_soundcloud):
-    #     pass
+    @patch('core.soundcloud_api.soundcloud.Client')
+    def test_already_existing_mention(self, mock_soundcloud):
+        next_href = 'https://api.soundcloud.com/e1/me/activities.json?' + \
+                    'limit=1&cursor=41d51698-0e80-0000-68c4-d0a603b982a9'
+        results = [
+            {
+                'collection': [soundcloud_mention_fixture[0]],
+                'next_href': next_href
+            }, {
+                'collection': [soundcloud_mention_fixture[1]],
+                'next_href': next_href
+            }, {
+                'collection': [soundcloud_mention_fixture[2]],
+                'next_href': next_href
+            }
+        ]
+        m1 = MagicMock()
+        m1.obj = results[0]
+        m2 = MagicMock()
+        m2.obj = results[1]
+        m3 = MagicMock()
+        m3.obj = results[2]
+        mocks = [m1, m2, m3]
+        mock_soundcloud.return_value.get.side_effect = mocks
+
+        soundcloud = SoundCloudAPI()
+        soundcloud.create_mentions()
+        mentions = Mention.objects.all()
+        self.assertEqual(len(mentions), 2)
+        mock_soundcloud.return_value.get.side_effect = mocks
+        soundcloud.create_mentions()
+        self.assertEqual(len(mentions), 2)
 
     @patch('core.soundcloud_api.soundcloud.Client')
     def test_create_mentions(self, mock_soundcloud):
@@ -144,20 +174,37 @@ class SoundCloudTests(TestCase):
         self.assertEqual(conversations[0].user_name, 'Bonbontaq')
         self.assertEqual(conversations[0].user_id, '6924356')
 
-    # @patch('core.soundcloud_api.soundcloud.Client')
-    # def test_add_messages_to_conversation(self, _):
-    #     soundcloud = SoundCloudAPI()
+    @patch('core.soundcloud_api.soundcloud.Client')
+    @patch('core.soundcloud_api.SoundCloudAPI.get_messages')
+    def test_message_creation(self, mock_messages, mock_soundcloud):
+        mock_messages.return_value = soundcloud_message_fixture
+        soundcloud = SoundCloudAPI()
+        convo = G(Conversation, user_id='1')
+        soundcloud.create_messages(convo)
+        messages = Message.objects.all()
+        self.assertEqual(len(messages), 3)
+        for m in messages:
+            self.assertEqual(m.conversation, convo)
+            self.assertEqual(m.user_id, '1')
+        m1 = messages[0]
+        m2 = messages[1]
+        m3 = messages[2]
+        self.assertEqual(m1.message, 'hey\n')
+        self.assertEqual(m2.message, 'back atcha')
+        self.assertEqual(m3.message, 'hi dogebot <3')
 
-    # def test_update_conversation(self):
-    #     pass
+    @patch('core.soundcloud_api.soundcloud.Client')
+    @patch('core.soundcloud_api.SoundCloudAPI.get_messages')
+    def test_duplicate_message(self, mock_messages, mock_soundcloud):
+        pass
 
-    # def test_create_new_messages(self):
-    #     pass
+    def test_message_time(self):
+        pass
 
-    # def test_get_user_id(self):
+    @patch('core.soundcloud_api.soundcloud.Client')
+    def test_add_messages_to_conversation(self, _):
+        soundcloud = SoundCloudAPI()
+
+    # def test_get_user(self):
     #     soundcloud = SoundCloudAPI()
     #     soundcloud.get_user_id('doge')
-
-    # def test_send_message(self):
-    #     soundcloud = SoundCloudAPI()
-    #     soundcloud.send_message('bonbontaq', 'hey')
