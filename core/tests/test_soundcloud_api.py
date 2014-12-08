@@ -1,7 +1,7 @@
 from core.soundcloud_api import SoundCloudAPI
 from core.models import Conversation, Mention, Message
 from core.tests.fixture import (soundcloud_conversation_fixture, soundcloud_message_fixture,
-                                soundcloud_mention_fixture)
+                                soundcloud_mention_fixture, soundcloud_resolve_user_fixture)
 from mock import patch, MagicMock
 from django.test import TestCase
 from django_dynamic_fixture import G
@@ -196,15 +196,25 @@ class SoundCloudTests(TestCase):
     @patch('core.soundcloud_api.soundcloud.Client')
     @patch('core.soundcloud_api.SoundCloudAPI.get_messages')
     def test_duplicate_message(self, mock_messages, mock_soundcloud):
-        pass
-
-    def test_message_time(self):
-        pass
+        mock_messages.return_value = soundcloud_message_fixture
+        soundcloud = SoundCloudAPI()
+        convo = G(Conversation, user_id='1')
+        soundcloud.create_messages(convo)
+        messages = Message.objects.all()
+        self.assertEqual(len(messages), 3)
+        for m in messages:
+            self.assertEqual(m.conversation, convo)
+            self.assertEqual(m.user_id, '1')
+        m1 = messages[0]
+        m2 = messages[1]
+        m3 = messages[2]
+        self.assertEqual(m1.message, 'hey\n')
+        self.assertEqual(m2.message, 'back atcha')
+        self.assertEqual(m3.message, 'hi dogebot <3')
 
     @patch('core.soundcloud_api.soundcloud.Client')
-    def test_add_messages_to_conversation(self, _):
+    def test_get_user(self, mock_soundcloud):
         soundcloud = SoundCloudAPI()
-
-    # def test_get_user(self):
-    #     soundcloud = SoundCloudAPI()
-    #     soundcloud.get_user_id('doge')
+        mock_soundcloud.return_value.get.return_value = MagicMock(obj=soundcloud_resolve_user_fixture)
+        res = soundcloud.get_soundcloud_user(user_id='doge')
+        self.assertEqual(res['username'], 'dogebot')

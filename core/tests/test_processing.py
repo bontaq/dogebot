@@ -167,11 +167,12 @@ class ProcessTests(TestCase):
         self.assertFalse(trans.pending)
         self.assertTrue(trans.accepted)
 
-    def test_expired_tip(self):
+    @patch('core.tasks.SoundCloudAPI')
+    def test_expired_tip(self, mock_soundcloud):
         from_user = G(User, balance=Decimal(100))
         trans = G(
             Transaction,
-            timestamp=datetime.now(pytz.utc) - timedelta(7),
+            timestamp=(datetime.now(pytz.utc) - timedelta(days=7)),
             pending=True,
             amount=Decimal(50),
             from_user=from_user,
@@ -180,3 +181,7 @@ class ProcessTests(TestCase):
             to_user_temp_id='Test'
         )
         self.processor.process_transactions()
+        trans_after = Transaction.objects.get(id=trans.id)
+        from_user_after = User.objects.get(id=from_user.id)
+        self.assertFalse(trans_after.pending)
+        self.assertEqual(from_user_after.balance, Decimal(150))

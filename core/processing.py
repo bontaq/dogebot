@@ -149,8 +149,8 @@ class Processor():
         """
         now = datetime.now(pytz.utc)
         for transaction in Transaction.objects.filter(pending=True):
-            if (transaction.timestamp - now).seconds > settings.TIP_EXPIRY:
-                transaction.from_user.balance += transaction.amt
+            if (now - transaction.timestamp).total_seconds() > settings.TIP_EXPIRY:
+                transaction.from_user.balance += transaction.amount
                 transaction.pending = False
                 transaction.from_user.save()
                 transaction.save()
@@ -158,7 +158,9 @@ class Processor():
                             transaction.from_user.user_id,
                             transaction.to_user_temp_id,
                             transaction.amount.quantize(Decimal('0.00')))
-                # notify refunded
+                tasks.send_notify_of_refund(transaction.from_user,
+                                            transaction.to_user_temp_id,
+                                            transaction.amount)
             else:
                 try:
                     to_user = User.objects.get(user_id=transaction.to_user_temp_id)
