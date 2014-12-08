@@ -145,3 +145,18 @@ def send_bad_balance(from_user_id, to_user_id, amt):
         logger.info('Notified %s that they do not have sufficient balance', from_user_id)
     except Exception as e:
         logger.exception(e)
+
+
+@task
+def send_notify_of_refund(from_user, to_user_id, amt):
+    soundcloud = SoundCloudAPI()
+    to_user = soundcloud.get_soundcloud_user(user_id=to_user_id)
+    msg = ("The tip you tried to send to {to_user} of {amt} doges "
+           "has been refunded to you").format(
+               to_user=to_user['username'],
+               amt=amt.quantize(Decimal("0.00")))
+    try:
+        soundcloud.send_message(from_user.user_id, msg)
+        logger.info('Notified %s of refund to %s', from_user.user_id, to_user_id)
+    except Exception as e:
+        logger.exception(e)
