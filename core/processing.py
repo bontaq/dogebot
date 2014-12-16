@@ -3,7 +3,7 @@ from datetime import datetime
 import pytz
 import logging
 from decimal import Decimal
-from core.models import Message, User, Transaction, Mention
+from core.models import Message, User, Transaction, Mention, WalletTransaction
 from core.soundcloud_api import SoundCloudAPI
 import core.soundcloud_parses as SCParser
 from core.wallet import WalletAPI
@@ -177,3 +177,21 @@ class Processor():
                     tasks.send_tip_success.delay(transaction.from_user.user_id, to_user.user_id, transaction.amount)
                 except User.DoesNotExist:
                     pass
+
+    def process_deposits(self):
+        try:
+            last_transaction = WalletTransaction.objects.latest('timestamp')
+        except WalletTransaction.DoesNotExist:
+            last_transaction = None
+
+        new_deposits = self.wallet.get_new_deposits(last_transaction)
+        for deposit in new_deposits:
+            try:
+                user = User.objects.get(deposit_address=deposit.to_address)
+                user.balance += deposit.amount
+                user.save()
+                deposit.pending = False
+                deposit.save()
+                tasks.send_successful_deposit(user, deposit)
+            except User.DoesNotExist:
+                logger.error('User could not be found for deposit to %s', deposit.to_address)

@@ -177,12 +177,26 @@ CLOSED: [2014-11-18 Tue 10:19]
     - [ ] send success message to newly registered user
     - [ ] send success message to from user that their tip was accepted
   - [ ] go over all transactions > 1 week & not accepted & return
-
-* TODO Add module name in front of log
-* TODO Update pending tip success message
-* TODO Add list of commands to welcome message
-* TODO Tracking deposits
-* TODO Withdraw command
+* CANCELLED Depositing doges
+CLOSED: [2014-12-15 Mon 12:42]
+- State "CANCELLED"  from "TODO"       [2014-12-15 Mon 12:42] \\
+  Other method turned out nice
+- Note taken on [2014-12-14 Sun 17:56] \\
+  This will work for a good while, might eventually need to change
+  it to going over transactions until the last one we processed is found
+- [ ] Scan for balances above 0
+- [ ] Look up user associated with address
+- [ ] Credit account
+- [ ] Move doges into main address
+* DONE Depositing doges (other way)
+CLOSED: [2014-12-15 Mon 13:35]
+- State "DONE"       from "TODO"       [2014-12-15 Mon 13:35]
+- [X] Return new transactions
+- [X] Credit associated account
+* DONE Check on new address creation
+CLOSED: [2014-12-15 Mon 13:35]
+- State "DONE"       from "TODO"       [2014-12-15 Mon 13:35]
+* NEXT Withdraw command
 * TODO Add history command
 - [ ] Add to parses
   - [ ] test added
@@ -194,6 +208,9 @@ CLOSED: [2014-11-18 Tue 10:19]
   - [ ] tests added
   - [ ] added to processings
 - [ ] Tested with real message & parse
+* TODO Add module name in front of log
+* TODO Update pending tip success message
+* TODO Add list of commands to welcome message
 
 * TODO Fix celery tasks
 ** TODO tasks auth expiring

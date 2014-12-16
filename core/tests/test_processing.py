@@ -3,7 +3,7 @@ import pytz
 from django.test import TestCase
 from mock import patch
 from django_dynamic_fixture import G
-from core.models import Conversation, Message, User, Transaction, Mention
+from core.models import Conversation, Message, User, Transaction, Mention, WalletTransaction
 from core.processing import (Processor, BadBalance, FromUserNotRegistered,
                              ToUserNotRegistered)
 from decimal import Decimal
@@ -185,3 +185,18 @@ class ProcessTests(TestCase):
         from_user_after = User.objects.get(id=from_user.id)
         self.assertFalse(trans_after.pending)
         self.assertEqual(from_user_after.balance, Decimal(150))
+
+    def test_process_deposits(self):
+        user = G(User, deposit_address="test", balance=0)
+        self.mock_wallet.return_value.get_new_deposits.return_value = [
+            WalletTransaction(
+                is_deposit=True,
+                pending=True,
+                to_address="test",
+                amount=100,
+                confirmations=3
+            )
+        ]
+        self.processor.process_deposits()
+        user = User.objects.get(id=user.id)
+        self.assertEqual(user.balance, 100)

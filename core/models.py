@@ -99,7 +99,7 @@ class Transaction(models.Model):
 
 class WalletTransaction(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, null=True)
     is_deposit = models.BooleanField(default=False)
     is_withdrawl = models.BooleanField(default=False)
     to_address = models.CharField(max_length=34)
@@ -113,7 +113,7 @@ class WalletTransaction(models.Model):
                 "amt:{amount}, pending:{pending}, confs:{confirmations}, "
                 "txid:{txid}").format(
                     time=self.timestamp,
-                    user=self.user.user_id,
+                    user=self.user.user_id if self.user else "None",
                     deposit=self.is_deposit,
                     withdrawl=self.is_withdrawl,
                     amount=self.amount,
