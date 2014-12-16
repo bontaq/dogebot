@@ -160,3 +160,18 @@ def send_notify_of_refund(from_user, to_user_id, amt):
         logger.info('Notified %s of refund to %s', from_user.user_id, to_user_id)
     except Exception as e:
         logger.exception(e)
+
+
+@task
+def send_successful_deposit(user, deposit):
+    soundcloud = SoundCloudAPI()
+    msg = ("Your deposit of {amt} doges was recieved. \n"
+           "Your balance is now {balance} doges.").format(
+               amt=deposit.amount,
+               balance=user.balance)
+    try:
+        soundcloud.send_message(user.user_id, msg)
+
+        logger.info('Notified %s of deposit', user.user_id)
+    except Exception as e:
+        logger.exception(e)
