@@ -8,7 +8,6 @@ logger = logging.getLogger()
 CONFIRMATIONS_BASE = 3
 
 
-
 class WalletAPI():
     def __init__(self):
         self.client = requests.Session()
@@ -39,9 +38,9 @@ class WalletAPI():
     def amount_received(self, address):
         return self.wallet_request("getreceivedbyaddress", *[address])
 
-    def send_amount(self, address, amount):
+    def send_amount(self, address, amount, from_wallet="users"):
         if self.validate_address(address):
-            result = self.wallet_request("sendtoaddress", *[address, amount])
+            result = self.wallet_request("sendfrom", *[from_wallet, address, amount])
         return result
 
     def get_new_address(self):
