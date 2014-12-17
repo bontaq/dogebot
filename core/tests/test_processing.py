@@ -58,6 +58,52 @@ class ProcessTests(TestCase):
         m_updated = Message.objects.get(pk=m.id)
         self.assertTrue(m_updated.processed)
 
+    @patch('core.processing.tasks')
+    def test_withdrawl_bad_address(self, mock_task):
+        self.mock_wallet.return_value.validate_address.return_value = False
+        u = G(User)
+        m = G(Message, message='withdrawl 100 fakeAddress', user_id=u.user_id, processed=False)
+        self.processor.process_messages()
+        assert mock_task.send_invalid_address.delay.called
+        m = Message.objects.get(id=m.id)
+        self.assertTrue(m.processed)
+
+    @patch('core.processing.tasks')
+    def test_withdrawl_bad_balance(self, mock_task):
+        self.mock_wallet.return_value.validate_address.return_value = True
+        u = G(User, balance=Decimal(5))
+        m = G(Message, message='withdrawl 100 totallyRealAddress', user_id=u.user_id, processed=False)
+        self.processor.process_messages()
+        self.assertTrue(mock_task.send_bad_balance_withdrawl.delay.called)
+        m = Message.objects.get(id=m.id)
+        self.assertTrue(m.processed)
+
+    @patch('core.processing.tasks')
+    def test_withdrawl_all(self, mock_task):
+        self.mock_wallet.return_value.validate_address.return_value = True
+        self.mock_wallet.return_value.send_amount.return_value = 'Something'
+        u = G(User, balance=Decimal(5))
+        m = G(Message, message='withdrawl all totallyRealAddress', user_id=u.user_id, processed=False)
+        self.processor.process_messages()
+        u = User.objects.get(id=u.id)
+        m = Message.objects.get(id=m.id)
+        self.assertEqual(u.balance, 0)
+        self.assertTrue(m.processed)
+        assert mock_task.send_successful_withdrawl.delay.called
+
+    @patch('core.processing.tasks')
+    def test_withdrawl_success(self, mock_task):
+        self.mock_wallet.return_value.validate_address.return_value = True
+        self.mock_wallet.return_value.send_amount.return_value = 'Something'
+        u = G(User, balance=Decimal(500))
+        m = G(Message, message='withdrawl 100 totallyRealAddress', user_id=u.user_id, processed=False)
+        self.processor.process_messages()
+        u = User.objects.get(id=u.id)
+        m = Message.objects.get(id=m.id)
+        self.assertEqual(u.balance, 400)
+        self.assertTrue(m.processed)
+        assert mock_task.send_successful_withdrawl.delay.called
+
     def test_transfer_funds_user_amount(self):
         user_a = G(User)
         user_b = G(User)

@@ -193,10 +193,13 @@ CLOSED: [2014-12-15 Mon 13:35]
 - State "DONE"       from "TODO"       [2014-12-15 Mon 13:35]
 - [X] Return new transactions
 - [X] Credit associated account
-* DONE Check on new address creation
-CLOSED: [2014-12-15 Mon 13:35]
+* HOLD Check on new address creation
+- State "HOLD"       from "DONE"       [2014-12-16 Tue 16:30]
 - State "DONE"       from "TODO"       [2014-12-15 Mon 13:35]
 * NEXT Withdraw command
+- [ ] Add to processing (including --all)
+- [ ] Add to wallet
+- [ ] Add message task
 * TODO Add history command
 - [ ] Add to parses
   - [ ] test added

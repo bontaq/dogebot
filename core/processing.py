@@ -68,7 +68,34 @@ class Processor():
                     message.save()
                 except Exception as e:
                     logger.exception(e)
-            # withdraw
+            elif SCParser.is_withdrawl(text):
+                amt, address = SCParser.parse_withdrawl(text)
+                user = User.objects.get(user_id=message.user_id)
+                if self.wallet.validate_address(address):
+                    if amt == 'all':
+                        result = self.wallet.send_amount(address, user.balance)
+                        if result:
+                            user.balance -= user.balance
+                            user.save()
+                            tasks.send_successful_withdrawl.delay(user, user.balance, address)
+                            message.processed = True
+                            message.save()
+                    elif user.balance >= amt:
+                        result = self.wallet.send_amount(address, amt)
+                        if result:
+                            user.balance -= amt
+                            user.save()
+                            tasks.send_successful_withdrawl.delay(user, amt, address)
+                            message.processed = True
+                            message.save()
+                    else:
+                        tasks.send_bad_balance_withdrawl.delay(user, amt)
+                        message.processed = True
+                        message.save()
+                else:
+                    tasks.send_invalid_address.delay(user, address)
+                    message.processed = True
+                    message.save()
             # history
 
     def is_user(self, user_id):

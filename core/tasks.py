@@ -175,3 +175,47 @@ def send_successful_deposit(user, deposit):
         logger.info('Notified %s of deposit', user.user_id)
     except Exception as e:
         logger.exception(e)
+
+
+@task
+def send_invalid_address(user, address):
+    soundcloud = SoundCloudAPI()
+    msg = ("The address you tried to send doge to was invalid.\n"
+           "address recieved: {addr}".format(
+               addr=address
+           ))
+    try:
+        soundcloud.send_message(user.user_id, msg)
+        logger.info('Notified %s of invalid address', user.user_id)
+    except Exception as e:
+        logger.exception(e)
+
+
+@task
+def send_bad_balance_withdrawl(user, amt):
+    soundcloud = SoundCloudAPI()
+    msg = ("You tried to withdraw {amt}, but your balance is only {balance}".format(
+        amt=amt.quantize(Decimal("0.00")),
+        balance=user.balance.quantize(Decimal("0.00"))
+    ))
+    try:
+        soundcloud.send_message(user.user_id, msg)
+        logger.info('Notified %s of insufficient funds address', user.user_id)
+    except Exception as e:
+        logger.exception(e)
+
+
+@task
+def send_successful_withdrawl(user, amt, address):
+    soundcloud = SoundCloudAPI()
+    msg = ("Successfully withdrew {amt} doges.\n"
+           "Sent to: {addr}"
+           "New balance: {balance}").format(
+               amt=amt.quantize(Decimal("0.00")),
+               addr=address,
+               balance=user.balance.quantize(Decimal("0.00")))
+    try:
+        soundcloud.send_message(user.user_id, msg)
+        logger.info('Notified %s of insufficient funds address', user.user_id)
+    except Exception as e:
+        logger.exception(e)

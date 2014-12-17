@@ -45,3 +45,21 @@ def is_mention_tip(message):
 def parse_mention_tip(message):
     match = re.match('^@dogebot:? tip (\d+\.\d+|\d+)$', message.strip(), re.IGNORECASE)
     return Decimal(match.group(1))
+
+
+withdrawl_regex = '^withdra(?:wl|wal|w) (\d+\.?\d+|all)(?:\sto)? (\w{3,})$'
+
+
+def is_withdrawl(message):
+    if re.match(withdrawl_regex, message.strip(), re.IGNORECASE):
+        return True
+    return False
+
+
+def parse_withdrawl(message):
+    match = re.match(withdrawl_regex, message.strip(), re.IGNORECASE)
+    if match:
+        amt = 'all' if match.group(1) == 'all' else Decimal(match.group(1))
+        return (amt, match.group(2))
+    else:
+        return None

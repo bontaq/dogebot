@@ -63,3 +63,25 @@ class SoundCloudParserTests(TestCase):
 
     def test_parse_mention_tip_with_colon(self):
         self.assertEqual(SCParser.parse_mention_tip('@dogebot: tip 100'), 100)
+
+    def test_is_withdrawl(self):
+        self.assertTrue(SCParser.is_withdrawl('withdrawl 100 nq5DWtga2zdK78s1Y1SQFyVmJqKJqZrEwy'))
+        self.assertTrue(SCParser.is_withdrawl('withdrawal 100 to nq5DWtga2zdK78s1Y1SQFyVmJqKJqZrEwy'))
+        self.assertTrue(SCParser.is_withdrawl('withdraw 100.5 nq5DWtga2zdK78s1Y1SQFyVmJqKJqZrEwy'))
+        self.assertTrue(SCParser.is_withdrawl('withdrawl all nq5DWtga2zdK78s1Y1SQFyVmJqKJqZrEwy'))
+        self.assertTrue(SCParser.is_withdrawl('withdrawal all to nq5DWtga2zdK78s1Y1SQFyVmJqKJqZrEwy'))
+        self.assertTrue(SCParser.is_withdrawl('withdraw all nq5DWtga2zdK78s1Y1SQFyVmJqKJqZrEwy'))
+
+    def test_bad_withdraw(self):
+        self.assertFalse(SCParser.is_withdrawl('withdrawl 100. nq5DWtga2zdK78s1Y1SQFyVmJqKJqZrEwy'))
+        self.assertFalse(SCParser.is_withdrawl('withdraw100 nq5DWtga2zdK78s1Y1SQFyVmJqKJqZrEwy'))
+        self.assertFalse(SCParser.is_withdrawl('withdraw100 to nq5DWtga2zdK78s1Y1SQFyVmJqKJqZrEwy'))
+        self.assertFalse(SCParser.is_withdrawl('withdraw 100 to '))
+
+    def test_parse_withdrawl(self):
+        self.assertEqual(SCParser.parse_withdrawl('withdrawl 100 nq5DWtga2zdK78s1Y1SQFyVmJqKJqZrEwy'),
+                         (100, 'nq5DWtga2zdK78s1Y1SQFyVmJqKJqZrEwy'))
+        self.assertEqual(SCParser.parse_withdrawl('withdrawl 50.5 nq5DWtga2zdK78s1Y1SQFyVmJqKJqZrEwy'),
+                         (50.5, 'nq5DWtga2zdK78s1Y1SQFyVmJqKJqZrEwy'))
+        self.assertEqual(SCParser.parse_withdrawl('withdrawl all nq5DWtga2zdK78s1Y1SQFyVmJqKJqZrEwy'),
+                         ('all', 'nq5DWtga2zdK78s1Y1SQFyVmJqKJqZrEwy'))

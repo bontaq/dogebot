@@ -14,9 +14,10 @@ class WalletAPITests(TestCase):
         result = self.wallet.wallet_amount()
         self.assertTrue(result > 0)
 
-    def test_validate_address(self):
-        result = self.wallet.validate_address("DQvhVFe1tcSmkRKKWjuhtDePSk7k47b4Vc")
-        self.assertTrue(result)
+    @patch('core.wallet.WalletAPI.wallet_request')
+    def test_validate_address(self, mock_request):
+        self.wallet.validate_address("DQvhVFe1tcSmkRKKWjuhtDePSk7k47b4Vc")
+        mock_request.assert_called_with('validateaddress', 'DQvhVFe1tcSmkRKKWjuhtDePSk7k47b4Vc')
 
     def test_get_received_by(self):
         result = self.wallet.amount_received(address="DQvhVFe1tcSmkRKKWjuhtDePSk7k47b4Vc")
