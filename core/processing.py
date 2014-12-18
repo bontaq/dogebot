@@ -96,7 +96,10 @@ class Processor():
                     tasks.send_invalid_address.delay(user, address)
                     message.processed = True
                     message.save()
-            # history
+            elif SCParser.is_history(text):
+                tasks.send_history(user)
+                message.processed = True
+                message.save()
 
     def is_user(self, user_id):
         return User.objects.filter(user_id=user_id).exists()
