@@ -72,20 +72,20 @@ class Processor():
                 amt, address = SCParser.parse_withdrawl(text)
                 user = User.objects.get(user_id=message.user_id)
                 if self.wallet.validate_address(address):
-                    if amt == 'all':
-                        result = self.wallet.send_amount(address, user.balance)
+                    if amt == 'all' or user.balance >= amt:
+                        amt_to_send = user.balance if amt == 'all' else amt
+                        result = self.wallet.send_amount(address, amt_to_send)
                         if result:
-                            user.balance -= user.balance
+                            tasks.send_successful_withdrawl.delay(user, amt_to_send, address)
+                            user.balance -= amt_to_send
                             user.save()
-                            tasks.send_successful_withdrawl.delay(user, user.balance, address)
-                            message.processed = True
-                            message.save()
-                    elif user.balance >= amt:
-                        result = self.wallet.send_amount(address, amt)
-                        if result:
-                            user.balance -= amt
-                            user.save()
-                            tasks.send_successful_withdrawl.delay(user, amt, address)
+                            WalletTransaction(
+                                user=user,
+                                is_withdrawl=True,
+                                amount=amt_to_send,
+                                txid=result,
+                                to_address=address
+                            ).save()
                             message.processed = True
                             message.save()
                     else:

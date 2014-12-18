@@ -5,7 +5,7 @@ import logging
 from core.models import WalletTransaction
 
 logger = logging.getLogger()
-CONFIRMATIONS_BASE = 3
+MIN_CONFIRMATIONS = 3
 
 
 class WalletAPI():
@@ -60,7 +60,7 @@ class WalletAPI():
             if transactions:
                 for trans in [t for t in transactions
                               if t["category"] == "receive"
-                              and t["confirmations"] >= CONFIRMATIONS_BASE]:
+                              and t["confirmations"] >= MIN_CONFIRMATIONS]:
                     if last_deposit and last_deposit.txid == trans["txid"]:
                         return new_deposits
                     else:
