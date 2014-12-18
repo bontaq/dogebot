@@ -1,10 +1,35 @@
 #+STARTUP: indent
 
-
-* TODO Tonight
-** TODO Push finished tests
-
 Soundcloud tip bot -- because that's way cooler than trading.
+
+* Current todos
+** TODO Dashboard
+*** TODO Tastypie
+*** TODO Add models to tastypie
+*** TODO Index.html
+*** TODO JS files location + grunt
+*** TODO scss + compass
+** TODO refactor history comand to use model to_history_string
+** TODO additional logging
+** TODO increment wallet transaction id
+** TODO fab deploy
+** TODO running on server
+** TODO balance command - show pending tips
+** TODO history command - include time and pending tips
+** TODO tests to run through before launch
+- [ ] Register user
+- [ ] Deposit doge
+- [ ] Tip registered user
+- [ ] Tip unregistered user
+- [ ] Tip (Insufficient funds)
+- [ ] Withdrawl all
+- [ ] Withdrawl some
+- [ ] Withdrawl (insufficient fund)
+- [ ] Withdrawl (bad address)
+- [ ] History
+- [ ] Accept command (make sure tip is processed)
+- [ ] Refund old tips
+- [ ] Balance
 
 * Production Setup
 ** TODO Configure postgres
@@ -21,10 +46,18 @@ Soundcloud tip bot -- because that's way cooler than trading.
 *** DONE Register command
 CLOSED: [2014-12-01 Mon 15:50]
 - State "DONE"       from "TODO"       [2014-12-01 Mon 15:50]
-*** TODO History command
-*** TODO Withdraw command
-**** TODO all
-**** TODO some amount
+*** DONE History command
+CLOSED: [2014-12-18 Thu 12:00]
+- State "DONE"       from "TODO"       [2014-12-18 Thu 12:00]
+*** DONE Withdraw command
+CLOSED: [2014-12-18 Thu 12:00]
+- State "DONE"       from "TODO"       [2014-12-18 Thu 12:00]
+**** DONE all
+CLOSED: [2014-12-18 Thu 12:00]
+- State "DONE"       from "TODO"       [2014-12-18 Thu 12:00]
+**** DONE some amount
+CLOSED: [2014-12-18 Thu 12:01]
+- State "DONE"       from "TODO"       [2014-12-18 Thu 12:01]
 *** TODO Accept command
 *** TODO Reject command
 
@@ -33,8 +66,12 @@ CLOSED: [2014-12-01 Mon 15:50]
    CLOSED: [2014-02-13 Thu 23:02]
 ** DONE Create new addresses
    CLOSED: [2014-02-13 Thu 23:02]
-** TODO Detect funds received
-** TODO Send Doge and subtract from user account
+** DONE Detect funds received
+CLOSED: [2014-12-18 Thu 12:00]
+- State "DONE"       from "TODO"       [2014-12-18 Thu 12:00]
+** DONE Send Doge and subtract from user account
+CLOSED: [2014-12-18 Thu 12:00]
+- State "DONE"       from "TODO"       [2014-12-18 Thu 12:00]
 
 * User Management
 ** DONE Pretty much I just mean create a model we can use
@@ -156,7 +193,7 @@ CLOSED: [2014-11-18 Tue 10:19]
 * TODO Tip via mentions
 - [X] Upgrade mention getting to use new v2 api
 - [X] we need to add a location (where the mention was made)
-- [-] basic tip (as in, not a reply to someone)?
+- [X] basic tip (as in, not a reply to someone)?
   - [X] processing mentions
   - [X] is_tip
   - [X] balance check
@@ -169,14 +206,14 @@ CLOSED: [2014-11-18 Tue 10:19]
     - [X] well we've got pending & accepted so we good.
     - [X] tested with real mention
   - [X] Send bad balance message
-  - [-] accept route
+  - [X] accept route
     - [X] process messages is_accept
     - [X] look for any pending transaction
       - [X] mark each complete
       - [X] transfer funds
-    - [ ] send success message to newly registered user
-    - [ ] send success message to from user that their tip was accepted
-  - [ ] go over all transactions > 1 week & not accepted & return
+    - [X] send success message to newly registered user
+    - [X] send success message to from user that their tip was accepted
+  - [X] go over all transactions > 1 week & not accepted & return
 * CANCELLED Depositing doges
 CLOSED: [2014-12-15 Mon 12:42]
 - State "CANCELLED"  from "TODO"       [2014-12-15 Mon 12:42] \\
@@ -193,7 +230,9 @@ CLOSED: [2014-12-15 Mon 13:35]
 - State "DONE"       from "TODO"       [2014-12-15 Mon 13:35]
 - [X] Return new transactions
 - [X] Credit associated account
-* HOLD Check on new address creation
+* DONE Check on new address creation
+CLOSED: [2014-12-18 Thu 12:02]
+- State "DONE"       from "HOLD"       [2014-12-18 Thu 12:02]
 - State "HOLD"       from "DONE"       [2014-12-16 Tue 16:30]
 - State "DONE"       from "TODO"       [2014-12-15 Mon 13:35]
 * DONE Withdraw command
@@ -224,23 +263,32 @@ CLOSED: [2014-12-18 Thu 11:56]
 * TODO Add list of commands to welcome message
 
 * TODO Fix celery tasks
-** TODO tasks auth expiring
+** DONE tasks auth expiring
+CLOSED: [2014-12-18 Thu 11:57]
+- State "DONE"       from "TODO"       [2014-12-18 Thu 11:57]
 ** TODO better handling of failed tasks
 ** TODO tasks are currently synchronous, add delays after testing live
+- Note taken on [2014-12-18 Thu 11:58] \\
+  Only for sending message tasks
 * TODO Only set processed to true if message to user has been sent?
-* TODO Improve welcome message
-
 * DONE Landmark: registered user -> registered user tip with mention on track
 CLOSED: [2014-12-02 Tue 06:32]
 - State "DONE"       from "TODO"       [2014-12-02 Tue 06:32]
 * DONE Add to_string methods for objects instead of manually parsing out this shit
 CLOSED: [2014-12-01 Mon 10:47]
 - State "DONE"       from "TODO"       [2014-12-01 Mon 10:47]
-* TODO Support for tipping specific comments
-* TODO Balance / deposit tracking
-* TODO Add URI field
+* SOMEDAY Support for tipping specific comments
+* DONE Balance / deposit tracking
+CLOSED: [2014-12-18 Thu 11:59]
+- State "DONE"       from "TODO"       [2014-12-18 Thu 11:59]
+* CANCELLED Add URI field
+CLOSED: [2014-12-18 Thu 11:59]
+- State "CANCELLED"  from "TODO"       [2014-12-18 Thu 11:59] \\
+  Why?
 
-* TODO Test with matching display name
+* DONE Test with matching display name
+CLOSED: [2014-12-18 Thu 11:59]
+- State "DONE"       from "TODO"       [2014-12-18 Thu 11:59]
 - Note taken on [2014-12-01 Mon 15:44] \\
   Yep, sending messages matches on display name.  This won't do, could easily send messages to the wrong user
 
@@ -249,17 +297,12 @@ CLOSED: [2014-12-01 Mon 10:47]
 - Transactions after that do not hit the blockchain
   - Except for withdrawls
 
-* TODO Dashboard
-** TODO Tastypie
-** TODO Add models to tastypie
-** TODO Index.html
-** TODO JS files location + grunt
-** TODO scss + compass
 
 * TODO Fab deploy
-* TODO move wallet tasks to tasks
+* CANCELLED move wallet tasks to tasks
+CLOSED: [2014-12-18 Thu 11:59]
+- State "CANCELLED"  from "TODO"       [2014-12-18 Thu 11:59] \\
+  No reason
 * DONE refactor get_new_mentions
 CLOSED: [2014-12-01 Mon 15:43]
 - State "DONE"       from "TODO"       [2014-12-01 Mon 15:43]
-* TODO Launch checklist
-- [ ] test
