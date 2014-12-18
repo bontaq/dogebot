@@ -206,13 +206,13 @@ CLOSED: [2014-12-17 Wed 15:29]
 - [X] Add to parses
   - [X] test added
   - [X] added to parses
-- [ ] Add to tasks
-  - [ ] tests added for tasks
-  - [ ] added to tasks
+- [X] Add to tasks
+  - [X] tests added for tasks
+  - [X] added to tasks
 - [ ] Add to_history_string for models
-- [ ] Add to processing
-  - [ ] tests added
-  - [ ] added to processings
+- [X] Add to processing
+  - [X] tests added
+  - [X] added to processings
 - [ ] Tested with real message & parse
 * TODO Add withdrawl wallettransaction
 * TODO Add module name in front of log
