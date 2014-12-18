@@ -104,6 +104,20 @@ class ProcessTests(TestCase):
         self.assertTrue(m.processed)
         assert mock_task.send_successful_withdrawl.delay.called
 
+    @patch('core.processing.tasks')
+    def test_withdrawl_transaction_creation(self, mock_task):
+        self.mock_wallet.return_value.validate_address.return_value = True
+        self.mock_wallet.return_value.send_amount.return_value = 'testTXid'
+        u = G(User, balance=Decimal(500))
+        m = G(Message, message='withdrawl 100 totallyRealAddress', user_id=u.user_id, processed=False)
+        self.processor.process_messages()
+        res = WalletTransaction.objects.get(user=u)
+        self.assertEqual(res.txid, 'testTXid')
+        self.assertEqual(res.amount, Decimal(100))
+        self.assertEqual(res.to_address, 'totallyRealAddress')
+        self.assertTrue(res.is_withdrawl)
+        self.assertFalse(res.is_deposit)
+
     def test_transfer_funds_user_amount(self):
         user_a = G(User)
         user_b = G(User)

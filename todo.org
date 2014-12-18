@@ -202,7 +202,9 @@ CLOSED: [2014-12-17 Wed 15:29]
 - [X] Add to processing (including --all)
 - [X] Add to wallet
 - [X] Add message task
-* NEXT Add history command
+* HOLD Add history command
+- State "HOLD"       from "NEXT"       [2014-12-18 Thu 10:49] \\
+  Still need to test on soundcloud
 - [X] Add to parses
   - [X] test added
   - [X] added to parses
@@ -214,7 +216,9 @@ CLOSED: [2014-12-17 Wed 15:29]
   - [X] tests added
   - [X] added to processings
 - [ ] Tested with real message & parse
-* TODO Add withdrawl wallettransaction
+* DONE Add withdrawl wallettransaction
+CLOSED: [2014-12-18 Thu 11:56]
+- State "DONE"       from "NEXT"       [2014-12-18 Thu 11:56]
 * TODO Add module name in front of log
 * TODO Update pending tip success message
 * TODO Add list of commands to welcome message
