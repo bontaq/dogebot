@@ -196,21 +196,25 @@ CLOSED: [2014-12-15 Mon 13:35]
 * HOLD Check on new address creation
 - State "HOLD"       from "DONE"       [2014-12-16 Tue 16:30]
 - State "DONE"       from "TODO"       [2014-12-15 Mon 13:35]
-* NEXT Withdraw command
-- [ ] Add to processing (including --all)
-- [ ] Add to wallet
-- [ ] Add message task
-* TODO Add history command
-- [ ] Add to parses
-  - [ ] test added
-  - [ ] added to parses
-- [ ] Add to tasks
-  - [ ] tests added for tasks
-  - [ ] added to tasks
-- [ ] Add to processing
-  - [ ] tests added
-  - [ ] added to processings
+* DONE Withdraw command
+CLOSED: [2014-12-17 Wed 15:29]
+- State "DONE"       from "NEXT"       [2014-12-17 Wed 15:29]
+- [X] Add to processing (including --all)
+- [X] Add to wallet
+- [X] Add message task
+* NEXT Add history command
+- [X] Add to parses
+  - [X] test added
+  - [X] added to parses
+- [X] Add to tasks
+  - [X] tests added for tasks
+  - [X] added to tasks
+- [ ] Add to_history_string for models
+- [X] Add to processing
+  - [X] tests added
+  - [X] added to processings
 - [ ] Tested with real message & parse
+* TODO Add withdrawl wallettransaction
 * TODO Add module name in front of log
 * TODO Update pending tip success message
 * TODO Add list of commands to welcome message

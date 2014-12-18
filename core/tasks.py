@@ -1,6 +1,7 @@
 from celery import task
 from core.soundcloud_api import SoundCloudAPI
-from core.models import User
+from core.models import User, WalletTransaction, Transaction
+from django.db.models import Q
 from decimal import Decimal
 import logging
 
@@ -217,5 +218,40 @@ def send_successful_withdrawl(user, amt, address):
     try:
         soundcloud.send_message(user.user_id, msg)
         logger.info('Notified %s of insufficient funds address', user.user_id)
+    except Exception as e:
+        logger.exception(e)
+
+
+def build_history(user):
+    wallet_transactions = list(WalletTransaction.objects.filter(user=user))
+    tips = list(Transaction.objects.filter(Q(from_user=user) | Q(to_user=user)))
+    results = (wallet_transactions + tips)
+    results.sort(key=lambda x: x.timestamp, reverse=True)
+    msg = ""
+    for result in results:
+        if isinstance(result, WalletTransaction):
+            msg += "{action} {amt} doges \n".format(
+                action="Deposited" if result.is_deposit else "Withdrew",
+                amt=result.amount.quantize(Decimal("0.00"))
+            )
+        else:
+            msg += "{action} {username} {amt} doges \n".format(
+                action="Tipped" if result.from_user == user else "Received from",
+                username=(result.to_user.user_name
+                          if result.from_user == user
+                          else result.from_user.user_name),
+                amt=result.amount.quantize(Decimal("0.00"))
+            )
+    return msg
+
+
+@task
+def send_history(user):
+    soundcloud = SoundCloudAPI()
+    msg = build_history(user)
+    msg = "Here is a history of your transactions: \n" + msg
+    try:
+        soundcloud.send_message(user.user_id, msg)
+        logger.info('Notified %s of history', user.user_id)
     except Exception as e:
         logger.exception(e)

@@ -3,15 +3,11 @@ from decimal import Decimal
 
 
 def is_register(message):
-    if message.strip().lower() == 'register':
-        return True
-    return False
+    return message.strip().lower() == 'register'
 
 
 def is_accept(message):
-    if message.strip().lower() == 'accept':
-        return True
-    return False
+    return message.strip().lower() == 'accept'
 
 
 def is_get_balance(message):
@@ -63,3 +59,7 @@ def parse_withdrawl(message):
         return (amt, match.group(2))
     else:
         return None
+
+
+def is_history(message):
+    return message.strip().lower() == 'history'
