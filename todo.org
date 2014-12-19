@@ -5,7 +5,10 @@ Soundcloud tip bot -- because that's way cooler than trading.
 * Current todos
 ** TODO Dashboard
 *** TODO Tastypie
-*** TODO Add models to tastypie
+**** TODO Add authorization
+*** DONE Add models to tastypie
+CLOSED: [2014-12-19 Fri 06:04]
+- State "DONE"       from "TODO"       [2014-12-19 Fri 06:04]
 *** TODO Index.html
 *** TODO JS files location + grunt
 *** TODO scss + compass
