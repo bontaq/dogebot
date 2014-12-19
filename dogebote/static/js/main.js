@@ -1429,7 +1429,7 @@ Elm.Main.make = function (_elm) {
    _P = _N.Ports.make(_elm),
    $moduleName = "Main",
    $Text = Elm.Text.make(_elm);
-   var main = $Text.asText("Hello world!");
+   var main = $Text.asText("Hello world! and Ian");
    _elm.Main.values = {_op: _op
                       ,main: main};
    return _elm.Main.values;

@@ -2,10 +2,10 @@
 
 # Set this to the root of your project when deployed:
 http_path = "/"
-css_dir = "stylesheets"
-sass_dir = "sass"
+css_dir = "dogebote/static/stylesheets"
+sass_dir = "dogebote/sass"
 images_dir = "images"
-javascripts_dir = "javascripts"
+javascripts_dir = "dogebot/static/js"
 
 # You can select your preferred output style here (can be overridden via the command line):
 # output_style = :expanded or :nested or :compact or :compressed

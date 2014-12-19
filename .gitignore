@@ -3,5 +3,8 @@ packs
 .idea
 debug.log
 dogebote/local_settings.py
-elm/elm-stuff
-elm/elm_dependencies
+elm-stuff
+elm_dependencies
+dogebote/static/.sass-cache
+.sass-cache
+node_modules/

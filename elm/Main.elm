@@ -1,3 +1,3 @@
 import Text (..)
 
-main = asText "Hello world!"
+main = asText "Hello world! and Ian"
