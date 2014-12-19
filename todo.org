@@ -13,6 +13,7 @@ Soundcloud tip bot -- because that's way cooler than trading.
 ** TODO additional logging
 ** TODO increment wallet transaction id
 ** TODO fab deploy
+** TODO testing without net connection
 ** TODO running on server
 ** TODO balance command - show pending tips
 ** TODO history command - include time and pending tips

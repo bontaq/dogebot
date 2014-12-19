@@ -3,3 +3,5 @@ packs
 .idea
 debug.log
 dogebote/local_settings.py
+elm/elm-stuff
+elm/elm_dependencies
