@@ -1,6 +1,16 @@
+{% load staticfiles %}
+
+<!DOCTYPE HTML>
+<html>
+
 <head>
-  <script type="text/javascript" scr="{% static 'js/main.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
 </head>
 <body>
-
 </body>
+
+<script>
+  Elm.fullscreen(Elm.App);
+</script>
+
+</html>

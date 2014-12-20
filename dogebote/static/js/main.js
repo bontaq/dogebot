@@ -1,4 +1,43 @@
 var Elm = Elm || { Native: {} };
+Elm.App = Elm.App || {};
+Elm.App.make = function (_elm) {
+   "use strict";
+   _elm.App = _elm.App || {};
+   if (_elm.App.values)
+   return _elm.App.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "App",
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Http = Elm.Http.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Text = Elm.Text.make(_elm);
+   var response = $Http.sendGet($Signal.constant("/api/v1/user/?format=json"));
+   var display = function (response) {
+      return function () {
+         switch (response.ctor)
+         {case "Failure":
+            return $Text.asText("Failure");
+            case "Success":
+            return $Text.asText(response._0);
+            case "Waiting":
+            return $Text.asText("Waiting");}
+         _U.badCase($moduleName,
+         "between lines 12 and 15");
+      }();
+   };
+   var main = A2($Signal.map,
+   display,
+   response);
+   _elm.App.values = {_op: _op
+                     ,display: display
+                     ,response: response
+                     ,main: main};
+   return _elm.App.values;
+};
 Elm.Basics = Elm.Basics || {};
 Elm.Basics.make = function (_elm) {
    "use strict";
@@ -1188,6 +1227,75 @@ Elm.Graphics.Element.make = function (_elm) {
                                   ,outward: outward};
    return _elm.Graphics.Element.values;
 };
+Elm.Http = Elm.Http || {};
+Elm.Http.make = function (_elm) {
+   "use strict";
+   _elm.Http = _elm.Http || {};
+   if (_elm.Http.values)
+   return _elm.Http.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Http",
+   $Native$Http = Elm.Native.Http.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var send = $Native$Http.send;
+   var Request = F4(function (a,
+   b,
+   c,
+   d) {
+      return {_: {}
+             ,body: c
+             ,headers: d
+             ,url: b
+             ,verb: a};
+   });
+   var request = Request;
+   var get = function (url) {
+      return A4(Request,
+      "GET",
+      url,
+      "",
+      _L.fromArray([]));
+   };
+   var sendGet = function (requestStrings) {
+      return send(A2($Signal.map,
+      get,
+      requestStrings));
+   };
+   var post = F2(function (url,
+   body) {
+      return A4(Request,
+      "POST",
+      url,
+      body,
+      _L.fromArray([]));
+   });
+   var Failure = F2(function (a,
+   b) {
+      return {ctor: "Failure"
+             ,_0: a
+             ,_1: b};
+   });
+   var Waiting = {ctor: "Waiting"};
+   var Success = function (a) {
+      return {ctor: "Success"
+             ,_0: a};
+   };
+   _elm.Http.values = {_op: _op
+                      ,Success: Success
+                      ,Waiting: Waiting
+                      ,Failure: Failure
+                      ,Request: Request
+                      ,request: request
+                      ,get: get
+                      ,post: post
+                      ,send: send
+                      ,sendGet: sendGet};
+   return _elm.Http.values;
+};
 Elm.List = Elm.List || {};
 Elm.List.make = function (_elm) {
    "use strict";
@@ -1415,24 +1523,6 @@ Elm.List.make = function (_elm) {
                       ,sortBy: sortBy
                       ,sortWith: sortWith};
    return _elm.List.values;
-};
-Elm.Main = Elm.Main || {};
-Elm.Main.make = function (_elm) {
-   "use strict";
-   _elm.Main = _elm.Main || {};
-   if (_elm.Main.values)
-   return _elm.Main.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   _P = _N.Ports.make(_elm),
-   $moduleName = "Main",
-   $Text = Elm.Text.make(_elm);
-   var main = $Text.asText("Hello world! and Ian");
-   _elm.Main.values = {_op: _op
-                      ,main: main};
-   return _elm.Main.values;
 };
 Elm.Maybe = Elm.Maybe || {};
 Elm.Maybe.make = function (_elm) {
@@ -2180,6 +2270,70 @@ Elm.Native.Graphics.Element.make = function(localRuntime) {
         guid: Utils.guid
     };
 
+};
+
+Elm.Native.Http = {};
+Elm.Native.Http.make = function(elm) {
+
+    elm.Native = elm.Native || {};
+    elm.Native.Http = elm.Native.Http || {};
+    if (elm.Native.Http.values) return elm.Native.Http.values;
+
+    var List = Elm.List.make(elm);
+    var Signal = Elm.Signal.make(elm);
+
+    function registerReq(queue,responses) {
+        return function(req) {
+            if (req.url.length > 0) {
+                sendReq(queue,responses,req);
+            }
+        };
+    }
+
+    function updateQueue(queue,responses) {
+        if (queue.length > 0) {
+            elm.notify(responses.id, queue[0].value);
+            if (queue[0].value.ctor !== 'Waiting') {
+                queue.shift();
+                setTimeout(function() { updateQueue(queue,responses); }, 0);
+            }
+        }
+    }
+
+    function sendReq(queue,responses,req) {
+        var response = { value: { ctor:'Waiting' } };
+        queue.push(response);
+
+        var request = (window.ActiveXObject
+                       ? new ActiveXObject("Microsoft.XMLHTTP")
+                       : new XMLHttpRequest());
+
+        request.onreadystatechange = function(e) {
+            if (request.readyState === 4) {
+                response.value = (request.status >= 200 && request.status < 300 ?
+                                  { ctor:'Success', _0:request.responseText } :
+                                  { ctor:'Failure', _0:request.status, _1:request.statusText });
+                setTimeout(function() { updateQueue(queue,responses); }, 0);
+            }
+        };
+        request.open(req.verb, req.url, true);
+        function setHeader(pair) {
+            request.setRequestHeader( pair._0, pair._1 );
+        }
+        A2( List.map, setHeader, req.headers );
+        request.send(req.body);
+    }
+
+    function send(requests) {
+        var responses = Signal.constant(elm.Http.values.Waiting);
+        var sender = A2( Signal.map, registerReq([],responses), requests );
+        function f(x) { return function(y) { return x; } }
+        return A3( Signal.map2, f, responses, sender );
+    }
+
+    return elm.Native.Http.values = {
+        send:send
+    };
 };
 
 Elm.Native.List = {};
@@ -3723,6 +3877,71 @@ Elm.Native.Text.make = function(elm) {
     };
 };
 
+Elm.Native.Time = {};
+Elm.Native.Time.make = function(elm) {
+
+  elm.Native = elm.Native || {};
+  elm.Native.Time = elm.Native.Time || {};
+  if (elm.Native.Time.values) return elm.Native.Time.values;
+
+  var Signal = Elm.Signal.make(elm);
+  var NS = Elm.Native.Signal.make(elm);
+  var Maybe = Elm.Maybe.make(elm);
+  var Utils = Elm.Native.Utils.make(elm);
+
+  function fpsWhen(desiredFPS, isOn) {
+    var msPerFrame = 1000 / desiredFPS;
+    var prev = elm.timer.now(), curr = prev, diff = 0, wasOn = true;
+    var ticker = NS.input(diff);
+    function tick(zero) {
+      return function() {
+        curr = elm.timer.now();
+        diff = zero ? 0 : curr - prev;
+        if (prev > curr) {
+          diff = 0;
+        }
+        prev = curr;
+        elm.notify(ticker.id, diff);
+      };
+    }
+    var timeoutID = 0;
+    function f(isOn, t) {
+      if (isOn) {
+        timeoutID = elm.setTimeout(tick(!wasOn && isOn), msPerFrame);
+      } else if (wasOn) {
+        clearTimeout(timeoutID);
+      }
+      wasOn = isOn;
+      return t;
+    }
+    return A3( Signal.map2, F2(f), isOn, ticker );
+  }
+
+  function every(t) {
+    var clock = NS.input(elm.timer.now());
+    function tellTime() {
+        elm.notify(clock.id, elm.timer.now());
+    }
+    setInterval(tellTime, t);
+    return clock;
+  }
+
+  function read(s) {
+      var t = Date.parse(s);
+      return isNaN(t) ? Maybe.Nothing : Maybe.Just(t);
+  }
+  return elm.Native.Time.values = {
+      fpsWhen : F2(fpsWhen),
+      fps : function(t) { return fpsWhen(t, Signal.constant(true)); },
+      every : every,
+      delay : NS.delay,
+      timestamp : NS.timestamp,
+      toDate : function(t) { return new window.Date(t); },
+      read   : read
+  };
+
+};
+
 Elm.Native = Elm.Native || {};
 Elm.Native.Utils = {};
 Elm.Native.Utils.make = function(localRuntime) {
@@ -4324,4 +4543,78 @@ Elm.Text.make = function (_elm) {
                       ,markdown: markdown
                       ,asText: asText};
    return _elm.Text.values;
+};
+Elm.Time = Elm.Time || {};
+Elm.Time.make = function (_elm) {
+   "use strict";
+   _elm.Time = _elm.Time || {};
+   if (_elm.Time.values)
+   return _elm.Time.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Time",
+   $Basics = Elm.Basics.make(_elm),
+   $Native$Time = Elm.Native.Time.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var delay = $Native$Time.delay;
+   var timestamp = $Native$Time.timestamp;
+   var since = F2(function (t,s) {
+      return function () {
+         var stop = A2($Signal.map,
+         $Basics.always(-1),
+         A2(delay,t,s));
+         var start = A2($Signal.map,
+         $Basics.always(1),
+         s);
+         var delaydiff = A3($Signal.foldp,
+         F2(function (x,y) {
+            return x + y;
+         }),
+         0,
+         A2($Signal.merge,start,stop));
+         return A2($Signal.map,
+         F2(function (x,y) {
+            return !_U.eq(x,y);
+         })(0),
+         delaydiff);
+      }();
+   });
+   var every = $Native$Time.every;
+   var fpsWhen = $Native$Time.fpsWhen;
+   var fps = $Native$Time.fps;
+   var inMilliseconds = function (t) {
+      return t;
+   };
+   var millisecond = 1;
+   var second = 1000 * millisecond;
+   var minute = 60 * second;
+   var hour = 60 * minute;
+   var inHours = function (t) {
+      return t / hour;
+   };
+   var inMinutes = function (t) {
+      return t / minute;
+   };
+   var inSeconds = function (t) {
+      return t / second;
+   };
+   _elm.Time.values = {_op: _op
+                      ,millisecond: millisecond
+                      ,second: second
+                      ,minute: minute
+                      ,hour: hour
+                      ,inMilliseconds: inMilliseconds
+                      ,inSeconds: inSeconds
+                      ,inMinutes: inMinutes
+                      ,inHours: inHours
+                      ,fps: fps
+                      ,fpsWhen: fpsWhen
+                      ,every: every
+                      ,since: since
+                      ,timestamp: timestamp
+                      ,delay: delay};
+   return _elm.Time.values;
 };
