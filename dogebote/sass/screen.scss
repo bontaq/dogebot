@@ -4,3 +4,30 @@
  * <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" /> */
 
 @import "compass/reset";
+
+body {
+    font-family: "Helvetica";
+    color: #06002B;
+}
+
+h1 {
+    font-weight: 900;
+    font-size: 3em;
+}
+
+#users {
+    width: 10%;
+}
+
+.list {
+    width: 25%;
+    margin-right: 5%;
+    float: left;
+    h1 {
+        padding-bottom: 5%;
+    }
+    li {
+        margin-bottom: 5px;
+        padding-bottom: 5px;
+    }
+}

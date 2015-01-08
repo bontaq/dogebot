@@ -10,7 +10,13 @@ Soundcloud tip bot -- because that's way cooler than trading.
 CLOSED: [2014-12-19 Fri 06:04]
 - State "DONE"       from "TODO"       [2014-12-19 Fri 06:04]
 *** TODO Index.html
-*** TODO JS files location + grunt
+*** DONE JS files location + grunt
+CLOSED: [2014-12-20 Sat 15:53]
+- State "DONE"       from "TODO"       [2014-12-20 Sat 15:53]
+*** TODO Elm based dash oh dog what have I done
+- [ ] Displaying live users list
+- [ ] Live list of transactions
+- [ ] List of wallet transactions
 *** TODO scss + compass
 ** TODO refactor history comand to use model to_history_string
 ** TODO additional logging

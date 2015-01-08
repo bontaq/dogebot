@@ -2,15 +2,59 @@
 
 <!DOCTYPE HTML>
 <html>
+  <head>
+    <link rel="stylesheet" href="{% static 'stylesheets/screen.css' %}" type="text/css" media="screen"/>
+    <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/underscore.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/knockout.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+  </head>
+  <body>
+    <div id="users" class="list">
+      <h1>Users</h1>
+      <ul data-bind="foreach: users">
+        <li>
+          <div data-bind="text: name"></div>
+          <div data-bind="text: balance"></div>
+        </li>
+      </ul>
+    </div>
 
-<head>
-  <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
-</head>
-<body>
-</body>
+    <div id="messages" class="list">
+      <h1>Messages</h1>
+      <ul data-bind="foreach: messages">
+        <li>
+          <span data-bind="text: name"></span>
+          <span data-bind="text: message"></span>
+        </li>
+      </ul>
+    </div>
 
-<script>
-  Elm.fullscreen(Elm.App);
-</script>
+    <div id="transactions" class="list">
+      <h1>Transactions</h1>
+      <ul data-bind="foreach: transactions">
+        <li>
+          <div><span data-bind="text: fromName"></span> to <span data-bind="text: toName"></span></div>
+          <!-- <div>From: <span data-bind="text: fromName"></span></div> -->
+          <!-- <div>To: <span data-bind="text: toName"></span></div> -->
+          <div data-bind="text: amount"></div>
+        </li>
+      </ul>
+    </div>
 
+    <div id="wallettransactions" class="list">
+      <h1>Wallet Transactions</h1>
+      <ul data-bind="foreach: walletTransactions">
+        <li>
+          <div data-bind="text: name"></div>
+          <div data-bind="text: type"></div>
+          <div data-bind="text: amount"></div>
+        </li>
+      </ul>
+    </div>
+
+    <script>
+      ko.applyBindings(dogeViewModel);
+    </script>
+  </body>
 </html>
