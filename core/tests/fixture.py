@@ -391,3 +391,6 @@ wallet_transactions_fixture = [{u'account': u'users',
   u'timereceived': 1418616853,
   u'txid': u'bafe23fc47d4d5b4e9f188264c8de4e82e5134be1a93d6053f5010a58b85d65d',
   u'walletconflicts': []}]
+
+# returns txid
+wallet_send_fixture = u'6cb18a509482d16595a8c2de0fd31d630e3f5f472f7d297e660576380ae918f7'

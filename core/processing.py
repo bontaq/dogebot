@@ -32,6 +32,7 @@ class Processor():
     def register_user(self, message):
         """Try to create a User with a deposit address, returns a User and created if it was
         successful"""
+
         user, created = User.objects.get_or_create(
             user_name=message.user_name,
             user_id=message.user_id,
@@ -42,6 +43,8 @@ class Processor():
         return user, created
 
     def process_messages(self):
+        """Everything to do with messages: registery, get_balance, withdrawl, and history"""
+
         for message in Message.objects.filter(processed=False):
             text = message.message
             if SCParser.is_register(text) or SCParser.is_accept(text):

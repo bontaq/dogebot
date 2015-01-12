@@ -3,9 +3,10 @@ from core.soundcloud_api import SoundCloudAPI
 from core.models import User, WalletTransaction, Transaction
 from django.db.models import Q
 from decimal import Decimal
-import logging
+from celery.utils.log import get_task_logger
 
-logger = logging.getLogger(__name__)
+
+logger = get_task_logger(__name__)
 
 
 @task

@@ -8,16 +8,21 @@ logger = logging.getLogger()
 MIN_CONFIRMATIONS = 3
 
 
+class InvalidAddress(Exception):
+    pass
+
+
 class WalletAPI():
     def __init__(self):
         self.client = requests.Session()
         self.client.auth = ('dogecoinrpc', settings.WALLET_AUTH)
         self.base_url = settings.WALLET_LOCATION
+        self.rpc_id = 0
 
     def wallet_request(self, method, *args):
         data = {
             "jsonrpc": "1.0",
-            "id": "1",
+            "id": self.rpc_id,
             "method": method,
             "params": args,
         }
@@ -25,6 +30,7 @@ class WalletAPI():
             self.base_url,
             data=json.dumps(data)
         )
+        self.rpc_id += 1
         return results.json()['result']
 
     def validate_address(self, address):
@@ -40,8 +46,9 @@ class WalletAPI():
 
     def send_amount(self, address, amount, from_wallet="users"):
         if self.validate_address(address):
-            result = self.wallet_request("sendfrom", *[from_wallet, address, amount])
-        return result
+            return self.wallet_request("sendfrom", *[from_wallet, address, amount])
+        else:
+            raise InvalidAddress(address)
 
     def get_new_address(self):
         address = self.wallet_request("getnewaddress", *["users"])

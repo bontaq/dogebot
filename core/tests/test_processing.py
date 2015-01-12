@@ -7,8 +7,12 @@ from core.models import Conversation, Message, User, Transaction, Mention, Walle
 from core.processing import (Processor, BadBalance, FromUserNotRegistered,
                              ToUserNotRegistered)
 from decimal import Decimal
+from django.test.utils import override_settings
 
 
+@override_settings(BROKER_BACKEND='memory',
+                   CELERY_ALWAYS_EAGER=True,
+                   CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
 class ProcessTests(TestCase):
     @patch('core.processing.SoundCloudAPI')
     @patch('core.processing.WalletAPI')
@@ -137,7 +141,9 @@ class ProcessTests(TestCase):
         self.assertFalse(trans.pending)
         self.assertTrue(trans.accepted)
 
-    def test_process_mention_both_users_registered(self):
+    @patch('core.tasks.send_tip_success')
+    def test_process_mention_both_users_registered(self, mock_task):
+        mock_task.return_value = True
         user_a = G(User, balance=Decimal(500))
         user_b = G(User, balance=Decimal(0))
         mention = G(
@@ -206,7 +212,10 @@ class ProcessTests(TestCase):
         self.assertFalse(trans.accepted)
         self.assertEqual(trans.amount, Decimal(50))
 
-    def test_process_transaction(self):
+
+    @patch('core.tasks.send_tip_success')
+    def test_process_transaction(self, mock_task):
+        mock_task.return_value = True
         from_user = G(User, balance=Decimal(100))
         trans = G(
             Transaction,

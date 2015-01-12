@@ -5,8 +5,12 @@ from core.models import WalletTransaction, Transaction, User
 from core import tasks
 from datetime import datetime, timedelta
 from decimal import Decimal
+from django.test.utils import override_settings
 
 
+@override_settings(BROKER_BACKEND='memory',
+                   CELERY_ALWAYS_EAGER=True,
+                   CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
 class TestTasks(TestCase):
     @patch('core.tasks.SoundCloudAPI.send_message')
     def test_history_task(self, mock_message):
@@ -22,10 +26,11 @@ class TestTasks(TestCase):
           from_user=user_b,
           to_user=user_a,
           amount=50)
-        G(WalletTransaction, user=user_a, timestamp=now - timedelta(seconds=5), amount=200)
+        G(WalletTransaction, user=user_a, is_withdrawl=True,
+          timestamp=now - timedelta(seconds=5), amount=200)
         tasks.send_history(user_a)
         mock_message.assert_called_with(
-            str(user_a.id),
+            str(user_a.user_id),
             ("Here is a history of your transactions: \n"
              "Received from OtherUser 50.00 doges \n"
              "Withdrew 200.00 doges \nTipped OtherUser 100.00 doges \n")

@@ -3,7 +3,7 @@ from django.test import TestCase
 from django_dynamic_fixture import G
 from core.models import WalletTransaction
 from core.tests.fixture import wallet_transactions_fixture
-from core.wallet import WalletAPI
+from core.wallet import WalletAPI, InvalidAddress
 
 
 class WalletAPITests(TestCase):
@@ -19,14 +19,33 @@ class WalletAPITests(TestCase):
         self.wallet.validate_address("DQvhVFe1tcSmkRKKWjuhtDePSk7k47b4Vc")
         mock_request.assert_called_with('validateaddress', 'DQvhVFe1tcSmkRKKWjuhtDePSk7k47b4Vc')
 
-    def test_get_received_by(self):
+    @patch('core.wallet.WalletAPI.wallet_request')
+    def test_get_received_by(self, mock_request):
+        mock_request.return_value = 100.0
         result = self.wallet.amount_received(address="DQvhVFe1tcSmkRKKWjuhtDePSk7k47b4Vc")
         self.assertTrue(result > 0)
 
-    def test_send_amount(self):
+    @patch('core.wallet.WalletAPI.validate_address')
+    @patch('core.wallet.WalletAPI.wallet_request')
+    def test_send_amount(self, mock_request, mock_validate):
+        txid = u'6cb18a509482d16595a8c2de0fd31d630e3f5f472f7d297e660576380ae918f7'
+        mock_request.return_value = txid
+        mock_validate.return_value = True
         result = self.wallet.send_amount("DQNGcuNArnAsmYhJCsg6tdRCGNUpgSWPTr", 10)
+        self.assertEqual(result, txid)
 
-    def test_create_new_address(self):
+    @patch('core.wallet.WalletAPI.validate_address')
+    @patch('core.wallet.WalletAPI.wallet_request')
+    def test_bad_send_amount(self, mock_request, mock_validate):
+        txid = u'6cb18a509482d16595a8c2de0fd31d630e3f5f472f7d297e660576380ae918f7'
+        mock_request.return_value = txid
+        mock_validate.return_value = False
+        with self.assertRaises(InvalidAddress):
+            result = self.wallet.send_amount("DQNGcuNArnAsmYhJCsg6tdRCGNUpgSWPTr", 10)
+
+    @patch('core.wallet.WalletAPI.wallet_request')
+    def test_create_new_address(self, mock_request):
+        mock_request.return_value = 'NotNone!'
         result = self.wallet.get_new_address()
         self.assertIsNotNone(result)
 

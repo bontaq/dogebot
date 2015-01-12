@@ -33,7 +33,8 @@ window.setInterval(function() {
       users = _.map(success.objects, function(user_obj) {
         return new User(
           user_obj.user_name,
-          user_obj.balance);
+          user_obj.balance
+        );
       });
       dogeViewModel.users(users);
     });
@@ -45,8 +46,9 @@ window.setInterval(function() {
       messages = _.map(success.objects, function(message_obj) {
         return new Message(
           message_obj.user_name,
-          message_obj.message);
-        });
+          message_obj.message
+        );
+      });
       dogeViewModel.messages(messages);
     });
 }, 10000);
