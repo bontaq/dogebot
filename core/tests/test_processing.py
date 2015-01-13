@@ -3,6 +3,7 @@ import pytz
 from django.test import TestCase
 from mock import patch
 from django_dynamic_fixture import G
+from core.wallet import WalletAPI
 from core.models import Conversation, Message, User, Transaction, Mention, WalletTransaction
 from core.processing import (Processor, BadBalance, FromUserNotRegistered,
                              ToUserNotRegistered)
@@ -65,7 +66,8 @@ class ProcessTests(TestCase):
     @patch('core.processing.tasks')
     def test_withdrawl_bad_address(self, mock_task):
         self.mock_wallet.return_value.validate_address.return_value = False
-        u = G(User)
+        self.mock_wallet.return_value.send_amount = WalletAPI().send_amount
+        u = G(User, balance=150)
         m = G(Message, message='withdrawl 100 fakeAddress', user_id=u.user_id, processed=False)
         self.processor.process_messages()
         assert mock_task.send_invalid_address.delay.called

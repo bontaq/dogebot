@@ -92,7 +92,7 @@ class Transaction(models.Model):
         return "{timestamp}, from:{from_user}, to:{to_user}, {amt}".format(
             timestamp=self.timestamp,
             from_user=self.from_user.user_id,
-            to_user=self.to_user.user_id,
+            to_user=self.to_user.user_id if self.to_user else self.to_user_temp_id,
             amt=self.amount
         )
 

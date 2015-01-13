@@ -6,7 +6,7 @@ from decimal import Decimal
 from core.models import Message, User, Transaction, Mention, WalletTransaction
 from core.soundcloud_api import SoundCloudAPI
 import core.soundcloud_parses as SCParser
-from core.wallet import WalletAPI
+from core.wallet import WalletAPI, InvalidAddress
 from core import tasks
 
 logger = logging.getLogger(__name__)
@@ -42,6 +42,40 @@ class Processor():
             user.save()
         return user, created
 
+    def handle_created_user(self, user, created, text):
+        if created:
+            tasks.send_welcome.delay(user)
+            logger.info('user created, username: %s, id: %s, message: %s',
+                        user.user_name,
+                        user.user_id,
+                        text)
+        else:
+            tasks.send_already_registered.delay(user)
+            logger.info('user tried to reregister, username: %s, id: %s, message: %s',
+                        user.user_name,
+                        user.user_id,
+                        text)
+
+    def handle_withdrawl(self, amt, address, user):
+        if amt == 'all' or user.balance >= amt:
+            amt_to_send = user.balance if amt == 'all' else amt
+            result = self.wallet.send_amount(address, amt_to_send)
+            if result:
+                tasks.send_successful_withdrawl.delay(user, amt_to_send, address)
+                user.balance -= amt_to_send
+                user.save()
+                wallet_transaction = WalletTransaction(
+                    user=user,
+                    is_withdrawl=True,
+                    amount=amt_to_send,
+                    txid=result,
+                    to_address=address
+                )
+                wallet_transaction.save()
+                logger.info(wallet_transaction)
+        else:
+            raise BadBalance()
+
     def process_messages(self):
         """Everything to do with messages: registery, get_balance, withdrawl, and history"""
 
@@ -49,18 +83,7 @@ class Processor():
             text = message.message
             if SCParser.is_register(text) or SCParser.is_accept(text):
                 user, created = self.register_user(message)
-                if created:
-                    tasks.send_welcome.delay(user)
-                    logger.info('user created, username: %s, id: %s, message: %s',
-                                user.user_name,
-                                user.user_id,
-                                text)
-                else:
-                    tasks.send_already_registered.delay(user)
-                    logger.info('user tried to reregister, username: %s, id: %s, message: %s',
-                                user.user_name,
-                                user.user_id,
-                                text)
+                self.handle_created_user(user, created, text)
                 message.processed = True
                 message.save()
             elif SCParser.is_get_balance(text):
@@ -74,33 +97,14 @@ class Processor():
             elif SCParser.is_withdrawl(text):
                 amt, address = SCParser.parse_withdrawl(text)
                 user = User.objects.get(user_id=message.user_id)
-                if self.wallet.validate_address(address):
-                    if amt == 'all' or user.balance >= amt:
-                        amt_to_send = user.balance if amt == 'all' else amt
-                        result = self.wallet.send_amount(address, amt_to_send)
-                        if result:
-                            tasks.send_successful_withdrawl.delay(user, amt_to_send, address)
-                            user.balance -= amt_to_send
-                            user.save()
-                            wallet_transaction = WalletTransaction(
-                                user=user,
-                                is_withdrawl=True,
-                                amount=amt_to_send,
-                                txid=result,
-                                to_address=address
-                            )
-                            wallet_transaction.save()
-                            logger.info(wallet_transaction)
-                            message.processed = True
-                            message.save()
-                    else:
-                        tasks.send_bad_balance_withdrawl.delay(user, amt)
-                        message.processed = True
-                        message.save()
-                else:
+                try:
+                    self.handle_withdrawl(amt, address, user)
+                except InvalidAddress:
                     tasks.send_invalid_address.delay(user, address)
-                    message.processed = True
-                    message.save()
+                except BadBalance:
+                    tasks.send_bad_balance_withdrawl.delay(user, amt)
+                message.processed = True
+                message.save()
             elif SCParser.is_history(text):
                 tasks.send_history(user)
                 message.processed = True
