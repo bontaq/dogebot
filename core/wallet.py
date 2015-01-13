@@ -46,7 +46,9 @@ class WalletAPI():
 
     def send_amount(self, address, amount, from_wallet="users"):
         if self.validate_address(address):
-            return self.wallet_request("sendfrom", *[from_wallet, address, amount])
+            txid = self.wallet_request("sendfrom", *[from_wallet, address, amount])
+            logger.info('Sent %s to %s', amount, address)
+            return txid
         else:
             raise InvalidAddress(address)
 

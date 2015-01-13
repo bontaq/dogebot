@@ -82,13 +82,15 @@ class Processor():
                             tasks.send_successful_withdrawl.delay(user, amt_to_send, address)
                             user.balance -= amt_to_send
                             user.save()
-                            WalletTransaction(
+                            wallet_transaction = WalletTransaction(
                                 user=user,
                                 is_withdrawl=True,
                                 amount=amt_to_send,
                                 txid=result,
                                 to_address=address
-                            ).save()
+                            )
+                            wallet_transaction.save()
+                            logger.info(wallet_transaction)
                             message.processed = True
                             message.save()
                     else:
@@ -125,22 +127,26 @@ class Processor():
             accepted=True
         )
         trans.save()
+        logger.info('Moved coin: %s', trans)
         return trans
 
     def handle_to_user_not_registered(self, from_user_id, to_user_id, amt):
-        Transaction(
+        trans = Transaction(
             from_user=User.objects.get(user_id=from_user_id),
             to_user_temp_id=to_user_id,
             amount=amt,
             pending=True,
             accepted=False,
-        ).save()
+        )
+        trans.save()
+        logger.info('Created pending transaction: %s', trans)
         from_user = User.objects.get(user_id=from_user_id)
         from_user.balance -= amt
         from_user.save()
 
     def process_mentions(self):
         """Goes through unprocessed mentions and manages those which are tips"""
+
         for mention in Mention.objects.filter(processed=False):
             if SCParser.is_mention_tip(mention.message):
                 from_user_id = mention.from_user_id
@@ -156,7 +162,7 @@ class Processor():
                     tasks.send_notify_from_user_pending_tip(from_user_id, to_user_id, amt_to_send)
                     tasks.send_notify_of_tip(from_user_id, to_user_id)
                 except BadBalance:
-                    tasks.send_bad_balance(from_user_id, to_user_id, amt)
+                    tasks.send_bad_balance(from_user_id, to_user_id, amt_to_send)
             mention.processed = True
             mention.save()
 
@@ -178,8 +184,8 @@ class Processor():
 
     def process_transactions(self):
         """Go through pending transactions and see if the recipient has accepted, then complete transaction.
-        If the request is over 3 days old return funds and inform the tipper.
-        """
+        If the request is over 3 days old return funds and inform the tipper."""
+
         now = datetime.now(pytz.utc)
         for transaction in Transaction.objects.filter(pending=True):
             if (now - transaction.timestamp).total_seconds() > settings.TIP_EXPIRY:

@@ -102,15 +102,6 @@ TEMPLATE_DIRS = (
 )
 
 
-    # 'formatters': {
-    #     'verbose': {
-    #         'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
-    #     },
-    #     'simple': {
-    #         'format': '%(levelname)s %(message)s'
-    #     },
-    # },
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -124,7 +115,7 @@ LOGGING = {
     },
     'formatters': {
         'simple': {
-            'format': '%(asctime)s %(message)s'
+            'format': '%(asctime)s %(module)s: %(message)s'
         },
     },
     'loggers': {
@@ -142,6 +133,16 @@ LOGGING = {
             'handlers': ['file'],
             'level': 'INFO',
             'propagate': True,
+        },
+        'core.wallet': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'default': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
         }
     },
 }
@@ -149,10 +150,6 @@ LOGGING = {
 
 TIP_EXPIRY = 259200  # 3 days
 
-
-################################
-# ADD NEW SETTINGS ABOVE HERE
-################################
 
 # Overwrite with local settings
 from dogebote.local_settings import *

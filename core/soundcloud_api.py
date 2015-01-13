@@ -26,6 +26,7 @@ class SoundCloudAPI():
         """Returns a generator for new mentions -- stops when we encounter a mention w/
         the latest uuid we already have stored.  Note: the API call is not documented, so
         keep an eye on this."""
+
         url = '/activities'
         try:
             uuid = Mention.objects.latest('timestamp').uuid
@@ -55,7 +56,7 @@ class SoundCloudAPI():
         for mention in mentions:
             if not Mention.objects.filter(uuid=mention['uuid']).exists():
                 # TODO: support for tipping specific comments
-                Mention(
+                mention = Mention(
                     uuid=mention['uuid'],
                     timestamp=parser.parse(mention['created_at']),
                     message=mention['comment']['body'],
@@ -64,12 +65,9 @@ class SoundCloudAPI():
                     to_user_name=mention['comment']['track']['user']['username'],
                     to_user_id=mention['comment']['track']['user']['id'],
                     on_track_url=mention['comment']['track']['permalink_url']
-                ).save()
-                logger.info('created mention: uuid: %s, username: %s, userid: %s, messages: %s',
-                            mention['uuid'],
-                            mention['user']['username'],
-                            mention['user']['id'],
-                            mention['comment']['body'])
+                )
+                mention.save()
+                logger.info('created mention: %s', mention)
             else:
                 logger.warning('mention already exists: uuid: %s, username: %s, userid: %s, messages: %s',
                                mention['uuid'],
@@ -89,18 +87,15 @@ class SoundCloudAPI():
             message_time = parser.parse(message['sent_at'])
             if Message.objects.filter(conversation=convo_obj,
                                       sent_at=message_time).exists() is not True:
-                Message(
+                message = Message(
                     conversation=convo_obj,
                     user_id=convo_obj.user_id,
                     user_name=convo_obj.user_name,
                     sent_at=message_time,
                     message=message['content']
-                ).save()
-                logger.info('created message: username: %s, userid: %s, sent_at: %s, message: %s',
-                            convo_obj.user_name,
-                            convo_obj.user_id,
-                            message_time,
-                            message['content'])
+                )
+                message.save()
+                logger.info('created message: %s', message)
 
     def get_conversations(self):
         try:
@@ -147,12 +142,14 @@ class SoundCloudAPI():
             convo.needs_update = convo.last_message_time != last_message_time
             convo.save()
         except Conversation.DoesNotExist:
-            Conversation(
+            convo = Conversation(
                 convo_id=convo_id,
                 user_name=from_user_name,
                 user_id=from_user_id,
                 last_message_time=last_message_time
-            ).save()
+            )
+            convo.save()
+            logger.info('created conversation: %s', convo)
 
     def create_conversations(self):
         conversations = self.get_conversations()
@@ -161,6 +158,7 @@ class SoundCloudAPI():
 
     def get_soundcloud_user(self, user_profile=None, user_id=None):
         """Get the user id from a url / permalink."""
+
         if user_id:
             url = 'https://api.soundcloud.com/users/{user_id}'.format(user_id=user_id)
         else:
