@@ -139,6 +139,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
+        'commands': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
         'default': {
             'handlers': ['file'],
             'level': 'INFO',
