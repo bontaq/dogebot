@@ -43,6 +43,8 @@ class Processor():
         return user, created
 
     def handle_created_user(self, user, created, text):
+        """Welcomes user or lets them know they've already registed"""
+
         if created:
             tasks.send_welcome.delay(user)
             logger.info('user created, username: %s, id: %s, message: %s',
@@ -57,6 +59,8 @@ class Processor():
                         text)
 
     def handle_withdrawl(self, amt, address, user):
+        """Transfers funds to an outside address"""
+
         if amt == 'all' or user.balance >= amt:
             amt_to_send = user.balance if amt == 'all' else amt
             result = self.wallet.send_amount(address, amt_to_send)
@@ -114,7 +118,8 @@ class Processor():
         return User.objects.filter(user_id=user_id).exists()
 
     def transfer_funds(self, from_user, to_user, amt):
-        """
+        """Transfer funds between users in the network
+
         :param from_user: User
         :param to_user: User
         :param amt: Decimal
@@ -135,6 +140,8 @@ class Processor():
         return trans
 
     def handle_to_user_not_registered(self, from_user_id, to_user_id, amt):
+        """Creates pending transaction and subtracts tip amount from from_user"""
+
         trans = Transaction(
             from_user=User.objects.get(user_id=from_user_id),
             to_user_temp_id=to_user_id,
@@ -171,6 +178,8 @@ class Processor():
             mention.save()
 
     def process_tip(self, from_user_id, to_user_id, amt):
+        """Handles a mention-based tip, from_user to_user"""
+
         try:
             from_user = User.objects.get(user_id=from_user_id)
         except User.DoesNotExist:
@@ -222,6 +231,8 @@ class Processor():
                     pass
 
     def process_deposits(self):
+        """Check for latest deposits and credits user account"""
+
         try:
             last_transaction = WalletTransaction.objects.latest('timestamp')
         except WalletTransaction.DoesNotExist:

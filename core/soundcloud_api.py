@@ -2,9 +2,7 @@ from django.conf import settings
 import soundcloud
 from core.models import Mention, Conversation, Message
 from dateutil import parser
-from urlparse import urlparse, parse_qs
 import logging
-import time
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +12,9 @@ class SoundCloudAPI():
     user_id = settings.SOUNDCLOUD_USER_ID
 
     def __init__(self):
+        """A little bit tricky.  Returns the same client after created so we avoid recreating
+        it too many times."""
+
         if not self.client:
             SoundCloudAPI.client = soundcloud.Client(
                 client_id=settings.SOUNDCLOUD_CLIENT_ID,
@@ -52,6 +53,8 @@ class SoundCloudAPI():
                 return
 
     def create_mentions(self):
+        """Gets the latest mentions from soundcloud and saves them"""
+
         mentions = self.get_new_mentions()
         for mention in mentions:
             if not Mention.objects.filter(uuid=mention['uuid']).exists():
@@ -76,12 +79,16 @@ class SoundCloudAPI():
                                mention['comment']['body'])
 
     def get_messages(self, convo_id):
+        """Returns all messages from a conversation"""
+
         results = self.client.get('/me/conversations/{convo_id}/messages'.format(
             convo_id=convo_id)
         )
         return [result.obj for result in results]
 
     def create_messages(self, convo_obj):
+        """Gets the latest messages from soundcloud and saves them"""
+
         messages = self.get_messages(convo_obj.convo_id)
         for message in messages:
             message_time = parser.parse(message['sent_at'])
@@ -98,6 +105,8 @@ class SoundCloudAPI():
                 logger.info('created message: %s', message)
 
     def get_conversations(self):
+        """Returns conversations that have been updated since last check"""
+
         try:
             most_recent_time = Conversation.objects.latest('last_message_time').last_message_time
         except Conversation.DoesNotExist:
@@ -122,6 +131,8 @@ class SoundCloudAPI():
             offset += 10
 
     def create_conversation(self, convo):
+        """Create conversation or marks them for update based on last message time"""
+
         convo_id = convo['id']
         # id looks like: u'77871924:6924356'
         # our id is first
@@ -152,6 +163,8 @@ class SoundCloudAPI():
             logger.info('created conversation: %s', convo)
 
     def create_conversations(self):
+        """Creates conversations"""
+
         conversations = self.get_conversations()
         for convo in conversations:
             self.create_conversation(convo)
@@ -167,12 +180,16 @@ class SoundCloudAPI():
         return results.obj
 
     def send_message(self, to_user_id, message):
+        """Sends a message on soundcloud to a user"""
+
         self.client.post('/me/conversations',
                          id='{me}:{them}'.format(me=self.user_id,
                                                  them=to_user_id),
                          content=message)
 
     def update_soundcloud(self):
+        """Creates latest mentions, updates or creates latest conversations"""
+
         self.create_mentions()
         self.create_conversations()
         for convo_obj in Conversation.objects.filter(needs_update=True):

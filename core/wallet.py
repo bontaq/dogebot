@@ -20,6 +20,8 @@ class WalletAPI():
         self.rpc_id = 0
 
     def wallet_request(self, method, *args):
+        """Handler for all requests, sends it straight to the rpc"""
+
         data = {
             "jsonrpc": "1.0",
             "id": self.rpc_id,
@@ -34,17 +36,25 @@ class WalletAPI():
         return results.json()['result']
 
     def validate_address(self, address):
+        """Returns if an address is valid or not"""
+
         result = self.wallet_request("validateaddress", *[address])
         return result['isvalid']
 
     def wallet_amount(self):
+        """Total amount of doge in the wallet"""
+
         results = self.wallet_request("listunspent")
         return sum(result['amount'] for result in results)
 
     def amount_received(self, address):
+        """Returns amount received by an address"""
+
         return self.wallet_request("getreceivedbyaddress", *[address])
 
     def send_amount(self, address, amount, from_wallet="users"):
+        """Send doge to a foreign address.  If the address is invalid, will raise InvalidAddress"""
+
         if self.validate_address(address):
             txid = self.wallet_request("sendfrom", *[from_wallet, address, amount])
             logger.info('Sent %s to %s', amount, address)
@@ -53,12 +63,15 @@ class WalletAPI():
             raise InvalidAddress(address)
 
     def get_new_address(self):
+        """Returns a new address in the users wallet"""
+
         address = self.wallet_request("getnewaddress", *["users"])
         logger.info('created wallet address: %s', address)
         return address
 
     def get_new_deposits(self, last_deposit=None):
-        """
+        """Looks for new deposits in the list of transaction and returns them
+
         :param last_deposit: WalletTransaction
         :returns: [WalletTransaction]
         """
