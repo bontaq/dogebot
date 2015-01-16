@@ -18,5 +18,6 @@ urlpatterns = patterns('',
     # url(r'^$', 'dogebote.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
     url(r'^$', 'core.views.home', name='home'),
+    url('^getlog', 'core.views.get_log', name='get_log'),
     (r'^api/', include(api_v1.urls)),
 )

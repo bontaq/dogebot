@@ -4,6 +4,7 @@
  * <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" /> */
 
 @import "compass/reset";
+@import "compass/utilities/general/clearfix";
 
 body {
     font-family: "Helvetica";
@@ -15,13 +16,18 @@ h1 {
     font-size: 3em;
 }
 
-#users {
-    width: 10%;
+#upper {
+    @include clearfix;
+    width: 100%;
+}
+
+#lower {
+    width: 100%;
+    font-family: "Lucida Console", Monaco, monospace;
 }
 
 .list {
     width: 25%;
-    margin-right: 5%;
     float: left;
     h1 {
         padding-bottom: 5%;

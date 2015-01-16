@@ -2,7 +2,8 @@ var dogeViewModel = {
   users: ko.observableArray([]),
   messages: ko.observableArray([]),
   transactions: ko.observableArray([]),
-  walletTransactions: ko.observableArray([])
+  walletTransactions: ko.observableArray([]),
+  logLines: ko.observableArray([])
 };
 
 function User(name, balance) {
@@ -25,6 +26,10 @@ function WalletTransaction(name, is_deposit, amount) {
   this.name = name;
   this.type = is_deposit ? "deposit" : "withdrawl";
   this.amount = parseFloat(amount).toFixed(2);
+}
+
+function LogLine(line) {
+  this.text = line;
 }
 
 window.setInterval(function() {
@@ -78,5 +83,12 @@ window.setInterval(function() {
         );
       });
       dogeViewModel.walletTransactions(transactions);
+    });
+}, 10000);
+
+window.setInterval(function() {
+  $.ajax("/getlog")
+    .done(function(success) {
+      dogeViewModel.logLines(success.objects);
     });
 }, 10000);
