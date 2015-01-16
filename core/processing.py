@@ -142,18 +142,21 @@ class Processor():
     def handle_to_user_not_registered(self, from_user_id, to_user_id, amt):
         """Creates pending transaction and subtracts tip amount from from_user"""
 
-        trans = Transaction(
-            from_user=User.objects.get(user_id=from_user_id),
-            to_user_temp_id=to_user_id,
-            amount=amt,
-            pending=True,
-            accepted=False,
-        )
-        trans.save()
-        logger.info('Created pending transaction: %s', trans)
         from_user = User.objects.get(user_id=from_user_id)
-        from_user.balance -= amt
-        from_user.save()
+        if from_user.balance > amt:
+            trans = Transaction(
+                from_user=User.objects.get(user_id=from_user_id),
+                to_user_temp_id=to_user_id,
+                amount=amt,
+                pending=True,
+                accepted=False,
+            )
+            trans.save()
+            logger.info('Created pending transaction: %s', trans)
+            from_user.balance -= amt
+            from_user.save()
+        else:
+            raise BadBalance()
 
     def process_mentions(self):
         """Goes through unprocessed mentions and manages those which are tips"""

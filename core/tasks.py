@@ -126,7 +126,7 @@ def send_from_user_not_registered(from_user_id):
     msg = ("You tried to tip someone but have not registered.  Respond with "
            "'register' if you would like to register.")
     try:
-        soundcloud.send_message(to_user['id'], msg)
+        soundcloud.send_message(from_user_id, msg)
         logger.info('Notified %s that they are not registered', from_user_id)
     except Exception as e:
         logger.exception(e)

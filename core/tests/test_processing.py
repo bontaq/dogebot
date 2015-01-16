@@ -238,6 +238,15 @@ class ProcessTests(TestCase):
         self.assertFalse(trans.pending)
         self.assertTrue(trans.accepted)
 
+    @patch('core.tasks.send_bad_balance')
+    def test_multiple_to_unregistered_tip(self, mock_bad_balance):
+        # Make sure a user can't tip an unregistered user without sufficient funds
+        from_user = G(User, balance=0)
+        with self.assertRaises(BadBalance):
+            self.processor.handle_to_user_not_registered(from_user.id, 'unregistered', 100)
+        from_user = User.objects.get(id=from_user.id)
+        self.assertEqual(from_user.balance, 0)
+
     @patch('core.tasks.SoundCloudAPI')
     def test_expired_tip(self, mock_soundcloud):
         from_user = G(User, balance=Decimal(100))
