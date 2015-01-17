@@ -34,7 +34,7 @@ class WalletResource(ModelResource):
 
 class TransactionResource(ModelResource):
     from_user = fields.ToOneField(UserResource, 'from_user', full=True)
-    to_user = fields.ToOneField(UserResource, 'to_user', full=True)
+    to_user = fields.ToOneField(UserResource, 'to_user', full=True, null=True)
 
     class Meta:
         queryset = Transaction.objects.all()

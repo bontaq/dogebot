@@ -83,9 +83,10 @@ window.setInterval(function() {
   $.ajax("/api/v1/transaction")
     .done(function(success) {
       transactions = _.map(success.objects, function(transaction_obj) {
+        var to_user_name = transaction_obj.to_user ? transaction_obj.to_user.user_name : 'None';
         return new Transaction(
-          transaction_obj.to_user.user_name,
           transaction_obj.from_user.user_name,
+          to_user_name,
           transaction_obj.amount
         );
       });
