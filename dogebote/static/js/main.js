@@ -1,6 +1,7 @@
 var dogeViewModel = {
   users: ko.observableArray([]),
   messages: ko.observableArray([]),
+  mentions: ko.observableArray([]),
   transactions: ko.observableArray([]),
   walletTransactions: ko.observableArray([]),
   logLines: ko.observableArray([])
@@ -15,6 +16,12 @@ function Message(name, message) {
   this.name = name;
   this.message = message;
 };
+
+function Mention(from_name, to_name, message) {
+  this.fromName = from_name;
+  this.toName = to_name;
+  this.message = message;
+}
 
 function Transaction(from_name, to_name, amount) {
   this.fromName = from_name;
@@ -55,6 +62,20 @@ window.setInterval(function() {
         );
       });
       dogeViewModel.messages(messages);
+    });
+}, 10000);
+
+window.setInterval(function() {
+  $.ajax("/api/v1/mention")
+    .done(function(success) {
+      mentions = _.map(success.objects, function(mention_obj) {
+        return new Mention(
+          mention_obj.from_user_name,
+          mention_obj.to_user_name,
+          mention_obj.message
+        );
+      });
+      dogeViewModel.mentions(mentions);
     });
 }, 10000);
 
