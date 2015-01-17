@@ -89,6 +89,6 @@ window.setInterval(function() {
 window.setInterval(function() {
   $.ajax("/getlog")
     .done(function(success) {
-      dogeViewModel.logLines(success.objects);
+      dogeViewModel.logLines(success.objects.reverse());
     });
 }, 10000);
