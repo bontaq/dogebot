@@ -1,5 +1,5 @@
 from tastypie.resources import ModelResource, fields
-from core.models import Message, WalletTransaction, Transaction, User
+from core.models import Message, WalletTransaction, Transaction, User, Mention
 
 
 class UserResource(ModelResource):
@@ -13,6 +13,13 @@ class MessageResource(ModelResource):
     class Meta:
         queryset = Message.objects.all()
         resource_name = 'message'
+        allowed_methods = ['get']
+
+
+class MentionResource(ModelResource):
+    class Meta:
+        queryset = Mention.objects.all()
+        resource_name = 'mention'
         allowed_methods = ['get']
 
 

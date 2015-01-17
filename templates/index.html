@@ -32,6 +32,19 @@
         </ul>
       </div>
 
+      <div id="mentions" class="list">
+        <h1>Mentions</h1>
+        <ul data-bind="foreach: mentions">
+          <li>
+            <div>
+              <span data-bind="text: fromName"></span>
+              <span data-bind="text: toName"></span>
+            </div>
+            <span data-bind="text: message"></span>
+          </li>
+        </ul>
+      </div>
+
       <div id="transactions" class="list">
         <h1>Transactions</h1>
         <ul data-bind="foreach: transactions">

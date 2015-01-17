@@ -24,6 +24,9 @@ h1 {
 #lower {
     width: 100%;
     font-family: "Lucida Console", Monaco, monospace;
+    #logs li {
+        margin-bottom: 10px;
+    }
 }
 
 .list {

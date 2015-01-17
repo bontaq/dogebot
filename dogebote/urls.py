@@ -1,13 +1,15 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from tastypie.api import Api
-from core.api import MessageResource, WalletResource, TransactionResource, UserResource
+from core.api import (MessageResource, WalletResource, TransactionResource, UserResource,
+                      MentionResource)
 
 admin.autodiscover()
 
 api_v1 = Api(api_name='v1')
 
 api_v1.register(MessageResource())
+api_v1.register(MentionResource())
 api_v1.register(WalletResource())
 api_v1.register(TransactionResource())
 api_v1.register(UserResource())
