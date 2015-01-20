@@ -63,3 +63,7 @@ def parse_withdrawl(message):
 
 def is_history(message):
     return message.strip().lower() == 'history'
+
+
+def is_help(message):
+    return message.strip().lower() == 'help'

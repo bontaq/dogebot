@@ -124,6 +124,20 @@ class ProcessTests(TestCase):
         self.assertTrue(res.is_withdrawl)
         self.assertFalse(res.is_deposit)
 
+    @patch('core.processing.tasks')
+    def test_history_message(self, mock_task):
+        user = G(User)
+        G(Message, processed=False, message="history", user_id=user.id)
+        self.processor.process_messages()
+        assert mock_task.send_history.delay.called
+
+    @patch('core.processing.tasks')
+    def test_help_message(self, mock_task):
+        user = G(User)
+        G(Message, processed=False, message="help", user_id=user.id)
+        self.processor.process_messages()
+        assert mock_task.send_help.delay.called
+
     def test_transfer_funds_user_amount(self):
         user_a = G(User)
         user_b = G(User)
@@ -213,7 +227,6 @@ class ProcessTests(TestCase):
         self.assertTrue(trans.pending)
         self.assertFalse(trans.accepted)
         self.assertEqual(trans.amount, Decimal(50))
-
 
     @patch('core.tasks.send_tip_success')
     def test_process_transaction(self, mock_task):

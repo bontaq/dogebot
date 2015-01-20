@@ -110,7 +110,13 @@ class Processor():
                 message.processed = True
                 message.save()
             elif SCParser.is_history(text):
-                tasks.send_history(user)
+                user = User.objects.get(user_id=message.user_id)
+                tasks.send_history.delay(user)
+                message.processed = True
+                message.save()
+            elif SCParser.is_help(text):
+                user = User.objects.get(user_id=message.user_id)
+                tasks.send_help.delay(user)
                 message.processed = True
                 message.save()
 
