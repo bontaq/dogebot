@@ -183,9 +183,8 @@ def send_successful_deposit(user, deposit):
 def send_invalid_address(user, address):
     soundcloud = SoundCloudAPI()
     msg = ("The address you tried to send doge to was invalid.\n"
-           "address recieved: {addr}".format(
-               addr=address
-           ))
+           "address recieved: {addr}").format(
+               addr=address)
     try:
         soundcloud.send_message(user.user_id, msg)
         logger.info('Notified %s of invalid address', user.user_id)
@@ -196,10 +195,9 @@ def send_invalid_address(user, address):
 @task
 def send_bad_balance_withdrawl(user, amt):
     soundcloud = SoundCloudAPI()
-    msg = ("You tried to withdraw {amt}, but your balance is only {balance}".format(
+    msg = "You tried to withdraw {amt}, but your balance is only {balance}".format(
         amt=amt.quantize(Decimal("0.00")),
-        balance=user.balance.quantize(Decimal("0.00"))
-    ))
+        balance=user.balance.quantize(Decimal("0.00")))
     try:
         soundcloud.send_message(user.user_id, msg)
         logger.info('Notified %s of insufficient funds address', user.user_id)
@@ -211,7 +209,7 @@ def send_bad_balance_withdrawl(user, amt):
 def send_successful_withdrawl(user, amt, address):
     soundcloud = SoundCloudAPI()
     msg = ("Successfully withdrew {amt} doges.\n"
-           "Sent to: {addr}"
+           "Sent to: {addr}\n"
            "New balance: {balance}").format(
                amt=amt.quantize(Decimal("0.00")),
                addr=address,
@@ -254,5 +252,22 @@ def send_history(user):
     try:
         soundcloud.send_message(user.user_id, msg)
         logger.info('Notified %s of history', user.user_id)
+    except Exception as e:
+        logger.exception(e)
+
+
+@task
+def send_help(user):
+    soundcloud = SoundCloudAPI()
+    msg = ("Dogebot let's you tip users dogecoins. \n"
+           "commands: \n"
+           "register - receive an address you can deposit doges to\n"
+           "balance - your current balance\n"
+           "withdraw [amount] [address] - send doges to an external address\n"
+           "history - shows tips you have given & received, deposits & withdraws\n"
+           "help - this command")
+    try:
+        soundcloud.send_message(user.user_id, msg)
+        logger.info('Notified %s of commands', user.user_id)
     except Exception as e:
         logger.exception(e)

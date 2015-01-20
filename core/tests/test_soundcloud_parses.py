@@ -85,3 +85,12 @@ class SoundCloudParserTests(TestCase):
                          (50.5, 'nq5DWtga2zdK78s1Y1SQFyVmJqKJqZrEwy'))
         self.assertEqual(SCParser.parse_withdrawl('withdrawl all nq5DWtga2zdK78s1Y1SQFyVmJqKJqZrEwy'),
                          ('all', 'nq5DWtga2zdK78s1Y1SQFyVmJqKJqZrEwy'))
+
+    def test_parse_help(self):
+        self.assertTrue(SCParser.is_help(' help '))
+        self.assertTrue(SCParser.is_help(' help \n'))
+        self.assertTrue(SCParser.is_help('help'))
+
+    def test_bad_help(self):
+        self.assertFalse(SCParser.is_help('helpme'))
+        self.assertFalse(SCParser.is_help('list help'))
