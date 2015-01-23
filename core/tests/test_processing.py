@@ -22,7 +22,7 @@ class ProcessTests(TestCase):
         self.mock_soundcloud = mock_soundcloud
         self.processor = Processor()
 
-    @patch('core.tasks')
+    @patch('core.tasks.send_welcome')
     def test_register_response(self, mock_tasks):
         self.mock_wallet.return_value.get_new_address.return_value = '1'
         convo = Conversation(
@@ -279,7 +279,8 @@ class ProcessTests(TestCase):
         self.assertFalse(trans_after.pending)
         self.assertEqual(from_user_after.balance, Decimal(150))
 
-    def test_process_deposits(self):
+    @patch('core.tasks.send_successful_deposit')
+    def test_process_deposits(self, mock_task):
         user = G(User, deposit_address="test", balance=0)
         self.mock_wallet.return_value.get_new_deposits.return_value = [
             WalletTransaction(
