@@ -93,7 +93,7 @@ class Processor():
             elif SCParser.is_get_balance(text):
                 user = User.objects.get(user_id=message.user_id)
                 try:
-                    tasks.send_balance(user)
+                    tasks.send_balance.delay(user)
                     message.processed = True
                     message.save()
                 except Exception as e:
@@ -178,13 +178,13 @@ class Processor():
                     self.process_tip(from_user_id, to_user_id, amt_to_send)
                     tasks.send_tip_success.delay(from_user_id, to_user_id, amt_to_send)
                 except FromUserNotRegistered:
-                    tasks.send_from_user_not_registered(from_user_id)
+                    tasks.send_from_user_not_registered.delay(from_user_id)
                 except ToUserNotRegistered:
                     self.handle_to_user_not_registered(from_user_id, to_user_id, amt_to_send)
-                    tasks.send_notify_from_user_pending_tip(from_user_id, to_user_id, amt_to_send)
-                    tasks.send_notify_of_tip(from_user_id, to_user_id)
+                    tasks.send_notify_from_user_pending_tip.delay(from_user_id, to_user_id, amt_to_send)
+                    tasks.send_notify_of_tip.delay(from_user_id, to_user_id)
                 except BadBalance:
-                    tasks.send_bad_balance(from_user_id, to_user_id, amt_to_send)
+                    tasks.send_bad_balance.delay(from_user_id, to_user_id, amt_to_send)
             mention.processed = True
             mention.save()
 
@@ -221,9 +221,9 @@ class Processor():
                             transaction.from_user.user_id,
                             transaction.to_user_temp_id,
                             transaction.amount.quantize(Decimal('0.00')))
-                tasks.send_notify_of_refund(transaction.from_user,
-                                            transaction.to_user_temp_id,
-                                            transaction.amount)
+                tasks.send_notify_of_refund.delay(transaction.from_user,
+                                                  transaction.to_user_temp_id,
+                                                  transaction.amount)
             else:
                 try:
                     to_user = User.objects.get(user_id=transaction.to_user_temp_id)
@@ -257,6 +257,6 @@ class Processor():
                 user.save()
                 deposit.pending = False
                 deposit.save()
-                tasks.send_successful_deposit(user, deposit)
+                tasks.send_successful_deposit.delay(user, deposit)
             except User.DoesNotExist:
                 logger.error('User could not be found for deposit to %s', deposit.to_address)

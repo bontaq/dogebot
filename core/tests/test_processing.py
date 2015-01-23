@@ -59,7 +59,7 @@ class ProcessTests(TestCase):
         u = G(User)
         m = G(Message, message='balance', user_id=u.user_id, processed=False)
         self.processor.process_messages()
-        self.assertTrue(mock_send_balance.called)
+        self.assertTrue(mock_send_balance.delay.called)
         m_updated = Message.objects.get(pk=m.id)
         self.assertTrue(m_updated.processed)
 
