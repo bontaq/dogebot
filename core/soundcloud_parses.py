@@ -33,13 +33,13 @@ def parse_tip(message):
 
 
 def is_mention_tip(message):
-    if re.match('^@dogebot:? tip (\d+)$', message.strip(), re.IGNORECASE):
+    if re.search('@dogebot:? tip (\d+)', message.strip(), re.IGNORECASE):
         return True
     return False
 
 
 def parse_mention_tip(message):
-    match = re.match('^@dogebot:? tip (\d+\.\d+|\d+)$', message.strip(), re.IGNORECASE)
+    match = re.search('@dogebot:? tip (\d+\.\d+|\d+)', message.strip(), re.IGNORECASE)
     return Decimal(match.group(1))
 
 
