@@ -100,13 +100,15 @@ class Processor():
                     logger.exception(e)
             elif SCParser.is_withdrawl(text):
                 amt, address = SCParser.parse_withdrawl(text)
-                user = User.objects.get(user_id=message.user_id)
                 try:
+                    user = User.objects.get(user_id=message.user_id)
                     self.handle_withdrawl(amt, address, user)
                 except InvalidAddress:
                     tasks.send_invalid_address.delay(user, address)
                 except BadBalance:
                     tasks.send_bad_balance_withdrawl.delay(user, amt)
+                except User.DoesNotExist:
+                    tasks.send_unregistered_withdrawl.delay(message.user_id)
                 message.processed = True
                 message.save()
             elif SCParser.is_history(text):

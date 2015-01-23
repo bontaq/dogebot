@@ -293,3 +293,9 @@ class ProcessTests(TestCase):
         self.processor.process_deposits()
         user = User.objects.get(id=user.id)
         self.assertEqual(user.balance, 100)
+
+    @patch('core.processing.tasks')
+    def test_withdrawl_bad_user(self, mock_tasks):
+        G(Message, user_id='zzz', processed=False, message='withdraw 100 DPsEnMGrL4dzX8zVwkqpTQ6tdert7GHBi8')
+        self.processor.process_messages()
+        assert mock_tasks.send_unregistered_withdrawl.delay.called

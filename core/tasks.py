@@ -206,6 +206,17 @@ def send_bad_balance_withdrawl(user, amt):
 
 
 @task
+def send_unregistered_withdrawl(user_id):
+    soundcloud = SoundCloudAPI()
+    msg = "You tried to withdraw without registering, reply with 'register' to register."
+    try:
+        soundcloud.send_message(user_id, msg)
+        logger.info('Notified %s that they are not registered, can not withdraw', user_id)
+    except Exception as e:
+        logger.exception(e)
+
+
+@task
 def send_successful_withdrawl(user, amt, address):
     soundcloud = SoundCloudAPI()
     msg = ("Successfully withdrew {amt} doges.\n"
