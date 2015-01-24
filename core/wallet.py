@@ -79,7 +79,7 @@ class WalletAPI():
         offset = 0
         new_deposits = []
         while True:
-            transactions = self.wallet_request("listtransactions", *["users", 10, offset])
+            transactions = reversed(self.wallet_request("listtransactions", *["users", 10, offset]))
             if transactions:
                 for trans in [t for t in transactions
                               if t["category"] == "receive"
