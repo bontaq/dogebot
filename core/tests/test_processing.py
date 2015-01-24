@@ -22,7 +22,7 @@ class ProcessTests(TestCase):
         self.mock_soundcloud = mock_soundcloud
         self.processor = Processor()
 
-    @patch('core.tasks')
+    @patch('core.tasks.send_welcome')
     def test_register_response(self, mock_tasks):
         self.mock_wallet.return_value.get_new_address.return_value = '1'
         convo = Conversation(
@@ -59,7 +59,7 @@ class ProcessTests(TestCase):
         u = G(User)
         m = G(Message, message='balance', user_id=u.user_id, processed=False)
         self.processor.process_messages()
-        self.assertTrue(mock_send_balance.called)
+        self.assertTrue(mock_send_balance.delay.called)
         m_updated = Message.objects.get(pk=m.id)
         self.assertTrue(m_updated.processed)
 
@@ -279,7 +279,8 @@ class ProcessTests(TestCase):
         self.assertFalse(trans_after.pending)
         self.assertEqual(from_user_after.balance, Decimal(150))
 
-    def test_process_deposits(self):
+    @patch('core.tasks.send_successful_deposit')
+    def test_process_deposits(self, mock_task):
         user = G(User, deposit_address="test", balance=0)
         self.mock_wallet.return_value.get_new_deposits.return_value = [
             WalletTransaction(
@@ -293,3 +294,9 @@ class ProcessTests(TestCase):
         self.processor.process_deposits()
         user = User.objects.get(id=user.id)
         self.assertEqual(user.balance, 100)
+
+    @patch('core.processing.tasks')
+    def test_withdrawl_bad_user(self, mock_tasks):
+        G(Message, user_id='zzz', processed=False, message='withdraw 100 DPsEnMGrL4dzX8zVwkqpTQ6tdert7GHBi8')
+        self.processor.process_messages()
+        assert mock_tasks.send_unregistered_withdrawl.delay.called

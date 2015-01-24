@@ -2,6 +2,7 @@ from django.conf import settings
 import json
 import requests
 import logging
+from decimal import Decimal
 from core.models import WalletTransaction
 
 logger = logging.getLogger()
@@ -56,7 +57,7 @@ class WalletAPI():
         """Send doge to a foreign address.  If the address is invalid, will raise InvalidAddress"""
 
         if self.validate_address(address):
-            txid = self.wallet_request("sendfrom", *[from_wallet, address, amount])
+            txid = self.wallet_request("sendfrom", *[from_wallet, address, float(amount)])
             logger.info('Sent %s to %s', amount, address)
             return txid
         else:
@@ -69,27 +70,28 @@ class WalletAPI():
         logger.info('created wallet address: %s', address)
         return address
 
-    def get_new_deposits(self, last_deposit=None):
+    def get_new_deposits(self, last_transaction=None):
         """Looks for new deposits in the list of transaction and returns them
 
-        :param last_deposit: WalletTransaction
+        :param last_transaction: WalletTransaction
         :returns: [WalletTransaction]
         """
         offset = 0
         new_deposits = []
         while True:
             transactions = self.wallet_request("listtransactions", *["users", 10, offset])
+            transactions.reverse()
             if transactions:
                 for trans in [t for t in transactions
-                              if t["category"] == "receive"
+                              if t["category"] in ["receive", "send"]
                               and t["confirmations"] >= MIN_CONFIRMATIONS]:
-                    if last_deposit and last_deposit.txid == trans["txid"]:
+                    if last_transaction and last_transaction.txid == trans["txid"]:
                         return new_deposits
-                    else:
+                    elif trans["category"] == "receive":
                         new_deposits.append(WalletTransaction(
                             to_address=trans["address"],
                             is_deposit=True,
-                            amount=trans["amount"],
+                            amount=Decimal(trans["amount"]),
                             confirmations=trans["confirmations"],
                             txid=trans["txid"]
                         ))

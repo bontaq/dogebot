@@ -28,7 +28,7 @@ def send_already_registered(user):
     msg = "You've already registered, your deposit address is:\n{address}\nand " \
           "your balance is: {balance}".format(
               address=user.deposit_address,
-              balance=user.balance)
+              balance=user.balance.quantize(Decimal("0.00")))
     try:
         soundcloud.send_message(user.user_id, msg)
         logger.info('Reply: already registered: %s %s', user.user_name, user.user_id)
@@ -101,7 +101,7 @@ def send_notify_from_user_pending_tip(from_user_id, to_user_id, amt):
                to_user=to_user['username'],
                amt=amt.quantize(Decimal("0.00")))
     try:
-        soundcloud.send_message(to_user['id'], msg)
+        soundcloud.send_message(from_user['id'], msg)
     except Exception as e:
         logger.exception(e)
 
@@ -170,7 +170,7 @@ def send_successful_deposit(user, deposit):
     msg = ("Your deposit of {amt} doges was recieved. \n"
            "Your balance is now {balance} doges.").format(
                amt=deposit.amount,
-               balance=user.balance)
+               balance=user.balance.quantize(Decimal("0.00")))
     try:
         soundcloud.send_message(user.user_id, msg)
 
@@ -206,6 +206,17 @@ def send_bad_balance_withdrawl(user, amt):
 
 
 @task
+def send_unregistered_withdrawl(user_id):
+    soundcloud = SoundCloudAPI()
+    msg = "You tried to withdraw without registering, reply with 'register' to register."
+    try:
+        soundcloud.send_message(user_id, msg)
+        logger.info('Notified %s that they are not registered, can not withdraw', user_id)
+    except Exception as e:
+        logger.exception(e)
+
+
+@task
 def send_successful_withdrawl(user, amt, address):
     soundcloud = SoundCloudAPI()
     msg = ("Successfully withdrew {amt} doges.\n"
@@ -216,7 +227,7 @@ def send_successful_withdrawl(user, amt, address):
                balance=user.balance.quantize(Decimal("0.00")))
     try:
         soundcloud.send_message(user.user_id, msg)
-        logger.info('Notified %s of insufficient funds address', user.user_id)
+        logger.info('Notified %s of successful withdraw', user.user_id)
     except Exception as e:
         logger.exception(e)
 

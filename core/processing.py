@@ -65,7 +65,6 @@ class Processor():
             amt_to_send = user.balance if amt == 'all' else amt
             result = self.wallet.send_amount(address, amt_to_send)
             if result:
-                tasks.send_successful_withdrawl.delay(user, amt_to_send, address)
                 user.balance -= amt_to_send
                 user.save()
                 wallet_transaction = WalletTransaction(
@@ -76,6 +75,7 @@ class Processor():
                     to_address=address
                 )
                 wallet_transaction.save()
+                tasks.send_successful_withdrawl.delay(user, amt_to_send, address)
                 logger.info(wallet_transaction)
         else:
             raise BadBalance()
@@ -93,20 +93,22 @@ class Processor():
             elif SCParser.is_get_balance(text):
                 user = User.objects.get(user_id=message.user_id)
                 try:
-                    tasks.send_balance(user)
+                    tasks.send_balance.delay(user)
                     message.processed = True
                     message.save()
                 except Exception as e:
                     logger.exception(e)
             elif SCParser.is_withdrawl(text):
                 amt, address = SCParser.parse_withdrawl(text)
-                user = User.objects.get(user_id=message.user_id)
                 try:
+                    user = User.objects.get(user_id=message.user_id)
                     self.handle_withdrawl(amt, address, user)
                 except InvalidAddress:
                     tasks.send_invalid_address.delay(user, address)
                 except BadBalance:
                     tasks.send_bad_balance_withdrawl.delay(user, amt)
+                except User.DoesNotExist:
+                    tasks.send_unregistered_withdrawl.delay(message.user_id)
                 message.processed = True
                 message.save()
             elif SCParser.is_history(text):
@@ -176,13 +178,13 @@ class Processor():
                     self.process_tip(from_user_id, to_user_id, amt_to_send)
                     tasks.send_tip_success.delay(from_user_id, to_user_id, amt_to_send)
                 except FromUserNotRegistered:
-                    tasks.send_from_user_not_registered(from_user_id)
+                    tasks.send_from_user_not_registered.delay(from_user_id)
                 except ToUserNotRegistered:
                     self.handle_to_user_not_registered(from_user_id, to_user_id, amt_to_send)
-                    tasks.send_notify_from_user_pending_tip(from_user_id, to_user_id, amt_to_send)
-                    tasks.send_notify_of_tip(from_user_id, to_user_id)
+                    tasks.send_notify_from_user_pending_tip.delay(from_user_id, to_user_id, amt_to_send)
+                    tasks.send_notify_of_tip.delay(from_user_id, to_user_id)
                 except BadBalance:
-                    tasks.send_bad_balance(from_user_id, to_user_id, amt_to_send)
+                    tasks.send_bad_balance.delay(from_user_id, to_user_id, amt_to_send)
             mention.processed = True
             mention.save()
 
@@ -219,9 +221,9 @@ class Processor():
                             transaction.from_user.user_id,
                             transaction.to_user_temp_id,
                             transaction.amount.quantize(Decimal('0.00')))
-                tasks.send_notify_of_refund(transaction.from_user,
-                                            transaction.to_user_temp_id,
-                                            transaction.amount)
+                tasks.send_notify_of_refund.delay(transaction.from_user,
+                                                  transaction.to_user_temp_id,
+                                                  transaction.amount)
             else:
                 try:
                     to_user = User.objects.get(user_id=transaction.to_user_temp_id)
@@ -249,12 +251,16 @@ class Processor():
 
         new_deposits = self.wallet.get_new_deposits(last_transaction)
         for deposit in new_deposits:
-            try:
-                user = User.objects.get(deposit_address=deposit.to_address)
-                user.balance += deposit.amount
-                user.save()
-                deposit.pending = False
-                deposit.save()
-                tasks.send_successful_deposit(user, deposit)
-            except User.DoesNotExist:
-                logger.error('User could not be found for deposit to %s', deposit.to_address)
+            if WalletTransaction.objects.filter(txid=deposit.txid).exists():
+                logger.warning('Tried to recreate a deposit, %s', deposit)
+            else:
+                try:
+                    user = User.objects.get(deposit_address=deposit.to_address)
+                    user.balance += deposit.amount
+                    user.save()
+                    deposit.user = user
+                    deposit.pending = False
+                    deposit.save()
+                    tasks.send_successful_deposit.delay(user, deposit)
+                except User.DoesNotExist:
+                    logger.error('User could not be found for deposit to %s', deposit.to_address)
