@@ -251,7 +251,7 @@ class Processor():
 
         new_deposits = self.wallet.get_new_deposits(last_transaction)
         for deposit in new_deposits:
-            if WalletTransaction.objects.filter(txid=deposit.txid).exist():
+            if WalletTransaction.objects.filter(txid=deposit.txid).exists():
                 logger.warning('Tried to recreate a deposit, %s', deposit)
             else:
                 try:
