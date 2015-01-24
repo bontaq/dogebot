@@ -79,10 +79,11 @@ class WalletAPI():
         offset = 0
         new_deposits = []
         while True:
-            transactions = reversed(self.wallet_request("listtransactions", *["users", 10, offset]))
+            transactions = self.wallet_request("listtransactions", *["users", 10, offset])
             if transactions:
                 for trans in [t for t in transactions
-                              if t["confirmations"] >= MIN_CONFIRMATIONS]:
+                              if t["category"] in ["receive", "send"]
+                              and t["confirmations"] >= MIN_CONFIRMATIONS]:
                     if last_transaction and last_transaction.txid == trans["txid"]:
                         return new_deposits
                     elif trans["category"] == "receive":
