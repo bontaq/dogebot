@@ -65,7 +65,6 @@ class Processor():
             amt_to_send = user.balance if amt == 'all' else amt
             result = self.wallet.send_amount(address, amt_to_send)
             if result:
-                tasks.send_successful_withdrawl.delay(user, amt_to_send, address)
                 user.balance -= amt_to_send
                 user.save()
                 wallet_transaction = WalletTransaction(
@@ -76,6 +75,7 @@ class Processor():
                     to_address=address
                 )
                 wallet_transaction.save()
+                tasks.send_successful_withdrawl.delay(user, amt_to_send, address)
                 logger.info(wallet_transaction)
         else:
             raise BadBalance()

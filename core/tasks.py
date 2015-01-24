@@ -227,7 +227,7 @@ def send_successful_withdrawl(user, amt, address):
                balance=user.balance.quantize(Decimal("0.00")))
     try:
         soundcloud.send_message(user.user_id, msg)
-        logger.info('Notified %s of insufficient funds address', user.user_id)
+        logger.info('Notified %s of successful withdraw', user.user_id)
     except Exception as e:
         logger.exception(e)
 
