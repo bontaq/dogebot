@@ -255,6 +255,7 @@ class Processor():
                 user = User.objects.get(deposit_address=deposit.to_address)
                 user.balance += deposit.amount
                 user.save()
+                deposit.user = user
                 deposit.pending = False
                 deposit.save()
                 tasks.send_successful_deposit.delay(user, deposit)
