@@ -28,7 +28,7 @@ def send_already_registered(user):
     msg = "You've already registered, your deposit address is:\n{address}\nand " \
           "your balance is: {balance}".format(
               address=user.deposit_address,
-              balance=user.balance)
+              balance=user.balance.quantize(Decimal("0.00")))
     try:
         soundcloud.send_message(user.user_id, msg)
         logger.info('Reply: already registered: %s %s', user.user_name, user.user_id)
@@ -170,7 +170,7 @@ def send_successful_deposit(user, deposit):
     msg = ("Your deposit of {amt} doges was recieved. \n"
            "Your balance is now {balance} doges.").format(
                amt=deposit.amount,
-               balance=user.balance)
+               balance=user.balance.quantize(Decimal("0.00")))
     try:
         soundcloud.send_message(user.user_id, msg)
 
