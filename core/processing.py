@@ -251,13 +251,16 @@ class Processor():
 
         new_deposits = self.wallet.get_new_deposits(last_transaction)
         for deposit in new_deposits:
-            try:
-                user = User.objects.get(deposit_address=deposit.to_address)
-                user.balance += deposit.amount
-                user.save()
-                deposit.user = user
-                deposit.pending = False
-                deposit.save()
-                tasks.send_successful_deposit.delay(user, deposit)
-            except User.DoesNotExist:
-                logger.error('User could not be found for deposit to %s', deposit.to_address)
+            if WalletTransaction.objects.filter(txid=deposit.txid).exist():
+                logger.warning('Tried to recreate a deposit, %s', deposit)
+            else:
+                try:
+                    user = User.objects.get(deposit_address=deposit.to_address)
+                    user.balance += deposit.amount
+                    user.save()
+                    deposit.user = user
+                    deposit.pending = False
+                    deposit.save()
+                    tasks.send_successful_deposit.delay(user, deposit)
+                except User.DoesNotExist:
+                    logger.error('User could not be found for deposit to %s', deposit.to_address)
