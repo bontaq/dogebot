@@ -2,6 +2,7 @@ from django.conf import settings
 import json
 import requests
 import logging
+from decimal import Decimal
 from core.models import WalletTransaction
 
 logger = logging.getLogger()
@@ -89,7 +90,7 @@ class WalletAPI():
                         new_deposits.append(WalletTransaction(
                             to_address=trans["address"],
                             is_deposit=True,
-                            amount=trans["amount"],
+                            amount=Decimal(trans["amount"]),
                             confirmations=trans["confirmations"],
                             txid=trans["txid"]
                         ))
