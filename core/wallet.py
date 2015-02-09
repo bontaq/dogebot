@@ -57,7 +57,7 @@ class WalletAPI():
         """Send doge to a foreign address.  If the address is invalid, will raise InvalidAddress"""
 
         if self.validate_address(address):
-            txid = self.wallet_request("sendfrom", *[from_wallet, address, float(amount)])
+            txid = self.wallet_request("sendfrom", *[from_wallet, address, (float(amount) + 1)])
             logger.info('Sent %s to %s', amount, address)
             return txid
         else:
