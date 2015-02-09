@@ -133,8 +133,10 @@ class Processor():
         :param amt: Decimal
         """
         from_user.balance -= amt
-        to_user.balance += amt
         from_user.save()
+        # because some oddballs like to tip themselves
+        to_user = User.objects.get(id=to_user.id)
+        to_user.balance += amt
         to_user.save()
         trans = Transaction(
             from_user=from_user,
