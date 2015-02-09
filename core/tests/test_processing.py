@@ -300,3 +300,6 @@ class ProcessTests(TestCase):
         G(Message, user_id='zzz', processed=False, message='withdraw 100 DPsEnMGrL4dzX8zVwkqpTQ6tdert7GHBi8')
         self.processor.process_messages()
         assert mock_tasks.send_unregistered_withdrawl.delay.called
+
+    def test_self_tip(self):
+        pass

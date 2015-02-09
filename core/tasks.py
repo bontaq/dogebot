@@ -12,7 +12,12 @@ logger = get_task_logger(__name__)
 @task
 def send_welcome(user):
     soundcloud = SoundCloudAPI()
-    msg = "Welcome to dogebot, your deposit address is:\n{address}".format(
+    msg = ("Welcome to dogebot, your deposit address is:\n{address}\n"
+           "commands: \n"
+           "balance - your current balance\n"
+           "withdraw [amount] [address] - send doges to an external address\n"
+           "history - shows tips you have given & received, deposits & withdraws\n"
+           "help - this command").format(
         address=user.deposit_address
     )
     try:
