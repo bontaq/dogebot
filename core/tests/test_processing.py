@@ -301,5 +301,14 @@ class ProcessTests(TestCase):
         self.processor.process_messages()
         assert mock_tasks.send_unregistered_withdrawl.delay.called
 
-    def test_self_tip(self):
-        pass
+    @patch('core.processing.tasks')
+    def test_self_tip(self, mock_tasks):
+        user = G(User, balance=50)
+        G(Mention,
+          processed=False,
+          message='@dogebot tip 10',
+          from_user_id=user.user_id,
+          to_user_id=user.user_id)
+        self.processor.process_mentions()
+        user = User.objects.get(id=user.id)
+        self.assertEqual(user.balance, 50)
