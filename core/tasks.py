@@ -96,7 +96,7 @@ def send_notify_from_user_pending_tip(from_user_id, to_user_id, amt):
     soundcloud = SoundCloudAPI()
     from_user = soundcloud.get_soundcloud_user(user_id=from_user_id)
     to_user = soundcloud.get_soundcloud_user(user_id=to_user_id)
-    msg = ("You sent {to_user} a tip of {amt}, they aren't current registered but I'll "
+    msg = ("You sent {to_user} a tip of {amt}, they aren't currently registered but I'll "
            "let you know if they accept the tip.").format(
                to_user=to_user['username'],
                amt=amt.quantize(Decimal("0.00")))
