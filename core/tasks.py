@@ -250,13 +250,20 @@ def build_history(user):
                 amt=result.amount.quantize(Decimal("0.00"))
             )
         else:
-            msg += "{action} {username} {amt} doges \n".format(
-                action="Tipped" if result.from_user == user else "Received from",
-                username=(result.to_user.user_name
+            if result.to_user is None:
+                to_user = SoundCloudAPI().get_soundcloud_user(user_id=result.to_user_temp_id)
+                msg += "Pending tip to {username} of {amt} \n".format(
+                    username=to_user['username'],
+                    amt=result.amount.quantize(Decimal("0.00"))
+                )
+            else:
+                msg += "{action} {username} {amt} doges \n".format(
+                    action="Tipped" if result.from_user == user else "Received from",
+                    username=(result.to_user.user_name
                           if result.from_user == user
                           else result.from_user.user_name),
-                amt=result.amount.quantize(Decimal("0.00"))
-            )
+                    amt=result.amount.quantize(Decimal("0.00"))
+                )
     return msg
 
 

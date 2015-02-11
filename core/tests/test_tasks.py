@@ -75,3 +75,15 @@ class TestTasks(TestCase):
           amount=Decimal(100))
         result = tasks.build_history(user)
         self.assertEqual(result, "Deposited 100.00 doges \n")
+
+    @patch('core.tasks.SoundCloudAPI')
+    def test_history_tip_pending(self, mock_soundcloud):
+        mock_soundcloud.return_value.get_soundcloud_user.return_value = {'username': 'test'}
+        user = G(User, user_name="Tipper")
+        receiver = None
+        G(Transaction,
+          from_user=user,
+          to_user=receiver,
+          amount=Decimal(10))
+        result = tasks.build_history(user)
+        self.assertEqual(result, "Pending tip to test of 10.00 \n")
