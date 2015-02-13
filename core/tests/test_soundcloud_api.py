@@ -4,6 +4,7 @@ from core.tests.fixture import (soundcloud_conversation_fixture, soundcloud_mess
                                 soundcloud_mention_fixture, soundcloud_resolve_user_fixture)
 from mock import patch, MagicMock
 from django.test import TestCase
+from django.test.utils import override_settings
 from django_dynamic_fixture import G
 
 
@@ -218,3 +219,13 @@ class SoundCloudTests(TestCase):
         mock_soundcloud.return_value.get.return_value = MagicMock(obj=soundcloud_resolve_user_fixture)
         res = soundcloud.get_soundcloud_user(user_id='doge')
         self.assertEqual(res['username'], 'dogebot')
+
+    @override_settings(SOUNDCLOUD_USER_ID='77871924')
+    @patch('core.soundcloud_api.soundcloud.Client')
+    def test_disable_send_message_to_self(self, mock_soundcloud):
+        # Soundcloud doesn't allow sending messages to yourself, it's messing
+        # with people trying to tip the bot
+        mock_soundcloud.return_value.post.side_effect = Exception('should not be called')
+        soundcloud = SoundCloudAPI()
+        res = soundcloud.send_message(to_user_id="77871924", message="hey there")
+        self.assertIsNone(res)
