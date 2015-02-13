@@ -220,12 +220,12 @@ class SoundCloudTests(TestCase):
         res = soundcloud.get_soundcloud_user(user_id='doge')
         self.assertEqual(res['username'], 'dogebot')
 
-    @override_settings(SOUNDCLOUD_USER_ID='77871924')
     @patch('core.soundcloud_api.soundcloud.Client')
     def test_disable_send_message_to_self(self, mock_soundcloud):
         # Soundcloud doesn't allow sending messages to yourself, it's messing
         # with people trying to tip the bot
         mock_soundcloud.return_value.post.side_effect = Exception('should not be called')
         soundcloud = SoundCloudAPI()
-        res = soundcloud.send_message(to_user_id="77871924", message="hey there")
+        soundcloud.user_id = '77871924'
+        res = soundcloud.send_message(to_user_id='77871924', message="hey there")
         self.assertIsNone(res)

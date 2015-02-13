@@ -181,7 +181,8 @@ class SoundCloudAPI():
 
     def send_message(self, to_user_id, message):
         """Sends a message on soundcloud to a user"""
-        if self.user_id != to_user_id:
+
+        if self.user_id != str(to_user_id):
             return self.client.post('/me/conversations',
                                     id='{me}:{them}'.format(me=self.user_id,
                                                             them=to_user_id),
