@@ -181,11 +181,13 @@ class SoundCloudAPI():
 
     def send_message(self, to_user_id, message):
         """Sends a message on soundcloud to a user"""
-
-        self.client.post('/me/conversations',
-                         id='{me}:{them}'.format(me=self.user_id,
-                                                 them=to_user_id),
-                         content=message)
+        if self.user_id != to_user_id:
+            return self.client.post('/me/conversations',
+                                    id='{me}:{them}'.format(me=self.user_id,
+                                                            them=to_user_id),
+                                    content=message)
+        else:
+            return None
 
     def update_soundcloud(self):
         """Creates latest mentions, updates or creates latest conversations"""
