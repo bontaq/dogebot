@@ -280,7 +280,7 @@ def send_history(user):
 
 
 @task
-def send_help(user):
+def send_help(user_id):
     soundcloud = SoundCloudAPI()
     msg = ("Dogebot let's you tip users dogecoins. \n"
            "commands: \n"
@@ -290,7 +290,7 @@ def send_help(user):
            "history - shows tips you have given & received, deposits & withdraws\n"
            "help - this command")
     try:
-        soundcloud.send_message(user.user_id, msg)
-        logger.info('Notified %s of commands', user.user_id)
+        soundcloud.send_message(user_id, msg)
+        logger.info('Notified %s of commands', user_id)
     except Exception as e:
         logger.exception(e)

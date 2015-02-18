@@ -117,8 +117,7 @@ class Processor():
                 message.processed = True
                 message.save()
             elif SCParser.is_help(text):
-                user = User.objects.get(user_id=message.user_id)
-                tasks.send_help.delay(user)
+                tasks.send_help.delay(message.user_id)
                 message.processed = True
                 message.save()
 
