@@ -63,6 +63,19 @@ class Message(models.Model):
         )
 
 
+class StuckMessage(models.Model):
+    timestamp = models.DateTimeField(auto_now_add=True)
+    user_id = models.CharField(max_length=24)
+    message = models.TextField()
+    error = models.TextField()
+
+    def __str__(self):
+        return "{timestamp}, {user_id}, {message}".format(
+            timestamp=self.timestamp,
+            user_id=self.user_id,
+            message=self.message
+        )
+
 class User(models.Model):
     user_name = models.CharField(db_index=True, max_length=128)
     user_id = models.CharField(max_length=24, unique=True)

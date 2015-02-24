@@ -35,4 +35,7 @@ class Command(BaseCommand):
         processor.process_deposits()
         logger.info('finished process deposits')
 
+        logger.info('clearing stuck messages')
+        processor.clear_stuck_messages()
+
         logger.info('completed update')

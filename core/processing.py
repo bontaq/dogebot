@@ -3,7 +3,7 @@ from datetime import datetime
 import pytz
 import logging
 from decimal import Decimal
-from core.models import Message, User, Transaction, Mention, WalletTransaction
+from core.models import Message, User, Transaction, Mention, WalletTransaction, StuckMessage
 from core.soundcloud_api import SoundCloudAPI
 import core.soundcloud_parses as SCParser
 from core.wallet import WalletAPI, InvalidAddress
@@ -265,3 +265,10 @@ class Processor():
                     tasks.send_successful_deposit.delay(user, deposit)
                 except User.DoesNotExist:
                     logger.error('User could not be found for deposit to %s', deposit.to_address)
+
+    def clear_stuck_messages(self):
+        for m in StuckMessage.objects.all():
+            self.soundcloud.send_message(to_user_id=m.user_id, message=m.message)
+            # if the message fails again, another StuckMessage will be created, so always
+            # delete the old one.
+            m.delete()

@@ -73,6 +73,9 @@ def send_tip_success(from_user_id, to_user_id, amt):
     )
     try:
         soundcloud.send_message(to_user['id'], tip_receiver_msg)
+    except Exception as e:
+        logger.exception(e)
+    try:
         soundcloud.send_message(from_user['id'], tip_sender_msg)
     except Exception as e:
         logger.exception(e)

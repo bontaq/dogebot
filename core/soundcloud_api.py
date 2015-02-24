@@ -1,7 +1,8 @@
 from django.conf import settings
 import soundcloud
-from core.models import Mention, Conversation, Message
+from core.models import Mention, Conversation, Message, StuckMessage
 from dateutil import parser
+import requests
 import logging
 
 logger = logging.getLogger(__name__)
@@ -180,13 +181,26 @@ class SoundCloudAPI():
         return results.obj
 
     def send_message(self, to_user_id, message):
-        """Sends a message on soundcloud to a user"""
+        """Sends a message on soundcloud to a user
+
+        If a message fails to send due to API issues, a StuckMessage object is created.
+        The next time the bot runs, another attempt is made to send stuck messages.
+        """
 
         if self.user_id != str(to_user_id):
-            return self.client.post('/me/conversations',
-                                    id='{me}:{them}'.format(me=self.user_id,
-                                                            them=to_user_id),
-                                    content=message)
+            try:
+                res = self.client.post(
+                    '/me/conversations', id='{me}:{them}'.format(
+                        me=self.user_id,
+                        them=to_user_id),
+                    content=message)
+                return res
+            except requests.exceptions.HTTPError as e:
+                StuckMessage(
+                    user_id=to_user_id,
+                    message=message,
+                    error=str(e)).save()
+                return None
         else:
             return None
 
