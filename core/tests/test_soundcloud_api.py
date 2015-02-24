@@ -1,7 +1,8 @@
 from core.soundcloud_api import SoundCloudAPI
-from core.models import Conversation, Mention, Message
+from core.models import Conversation, Mention, Message, StuckMessage
 from core.tests.fixture import (soundcloud_conversation_fixture, soundcloud_message_fixture,
                                 soundcloud_mention_fixture, soundcloud_resolve_user_fixture)
+import requests
 from mock import patch, MagicMock
 from django.test import TestCase
 from django.test.utils import override_settings
@@ -229,3 +230,12 @@ class SoundCloudTests(TestCase):
         soundcloud.user_id = '77871924'
         res = soundcloud.send_message(to_user_id='77871924', message="hey there")
         self.assertIsNone(res)
+
+    @patch('core.soundcloud_api.soundcloud.Client')
+    def test_http_error_create_temp_message(self, mock_soundcloud):
+        soundcloud = SoundCloudAPI()
+        mock_soundcloud.return_value.post.side_effect = requests.exceptions.HTTPError('error')
+        soundcloud.send_message(to_user_id='123577402', message="test")
+        res = StuckMessage.objects.all()
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0].user_id, '123577402')

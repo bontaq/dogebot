@@ -1,10 +1,12 @@
-from datetime import datetime, timedelta
 import pytz
+import requests
+from datetime import datetime, timedelta
 from django.test import TestCase
 from mock import patch
 from django_dynamic_fixture import G
 from core.wallet import WalletAPI
-from core.models import Conversation, Message, User, Transaction, Mention, WalletTransaction
+from core.models import (Conversation, Message, User, Transaction, Mention, WalletTransaction,
+                         StuckMessage)
 from core.processing import (Processor, BadBalance, FromUserNotRegistered,
                              ToUserNotRegistered)
 from decimal import Decimal
@@ -312,3 +314,18 @@ class ProcessTests(TestCase):
         self.processor.process_mentions()
         user = User.objects.get(id=user.id)
         self.assertEqual(user.balance, 50)
+
+    @patch('core.processing.tasks')
+    def test_unregistered_user_sending_command(self, mock_tasks):
+        G(Message, message='help', user_id='fakefakefake')
+        try:
+            self.processor.process_messages()
+        except User.DoesNotExist:
+            self.fail()
+
+    def test_clear_stuck_messages(self):
+        StuckMessage(user_id='123577402', message='test', error='something bad').save()
+        self.processor.clear_stuck_messages()
+        self.processor.soundcloud.send_message.assert_called_with(to_user_id=u'123577402',
+                                                                  message='test')
+        self.assertEqual(StuckMessage.objects.all().count(), 0)
