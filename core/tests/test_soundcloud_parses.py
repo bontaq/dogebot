@@ -55,6 +55,7 @@ class SoundCloudParserTests(TestCase):
         self.assertTrue(SCParser.is_mention_tip('@dogebot: tip 100'))
         self.assertTrue(SCParser.is_mention_tip('@dogebot tip 100'))
         self.assertTrue(SCParser.is_mention_tip('what a song, @dogebot tip 11'))
+        self.assertTrue(SCParser.is_mention_tip('love it, @dogebot 50, great song'))
 
     def test_parse_mention_tip(self):
         amt = SCParser.parse_mention_tip('@dogebot tip 100')
@@ -63,6 +64,8 @@ class SoundCloudParserTests(TestCase):
         self.assertEqual(amt, Decimal('10.50'))
         amt = SCParser.parse_mention_tip('what a song, @dogebot tip 11')
         self.assertEqual(amt, Decimal('11'))
+        amt = SCParser.parse_mention_tip('love it, @dogebot 50, great song')
+        self.assertEqual(amt, Decimal('50'))
 
     def test_parse_mention_tip_with_colon(self):
         self.assertEqual(SCParser.parse_mention_tip('@dogebot: tip 100'), 100)
