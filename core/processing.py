@@ -181,9 +181,12 @@ class Processor():
                 except FromUserNotRegistered:
                     tasks.send_from_user_not_registered.delay(from_user_id)
                 except ToUserNotRegistered:
-                    self.handle_to_user_not_registered(from_user_id, to_user_id, amt_to_send)
-                    tasks.send_notify_from_user_pending_tip.delay(from_user_id, to_user_id, amt_to_send)
-                    tasks.send_notify_of_tip.delay(from_user_id, to_user_id)
+                    try:
+                        self.handle_to_user_not_registered(from_user_id, to_user_id, amt_to_send)
+                        tasks.send_notify_from_user_pending_tip.delay(from_user_id, to_user_id, amt_to_send)
+                        tasks.send_notify_of_tip.delay(from_user_id, to_user_id)
+                    except BadBalance:
+                        tasks.send_bad_balance.delay(from_user_id, to_user_id, amt_to_send)
                 except BadBalance:
                     tasks.send_bad_balance.delay(from_user_id, to_user_id, amt_to_send)
             mention.processed = True
