@@ -76,6 +76,7 @@ class StuckMessage(models.Model):
             message=self.message
         )
 
+
 class User(models.Model):
     user_name = models.CharField(db_index=True, max_length=128)
     user_id = models.CharField(max_length=24, unique=True)

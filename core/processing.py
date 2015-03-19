@@ -152,7 +152,7 @@ class Processor():
         """Creates pending transaction and subtracts tip amount from from_user"""
 
         from_user = User.objects.get(user_id=from_user_id)
-        if from_user.balance > amt:
+        if from_user.balance >= amt:
             trans = Transaction(
                 from_user=User.objects.get(user_id=from_user_id),
                 to_user_temp_id=to_user_id,

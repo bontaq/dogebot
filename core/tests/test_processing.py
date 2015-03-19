@@ -329,3 +329,14 @@ class ProcessTests(TestCase):
         self.processor.soundcloud.send_message.assert_called_with(to_user_id=u'123577402',
                                                                   message='test')
         self.assertEqual(StuckMessage.objects.all().count(), 0)
+
+    @patch('core.processing.tasks')
+    def test_tip_of_whole_balance(self, mock_tasks):
+        from_user = G(User, balance=10)
+        G(Mention, message='@dogebot tip 10',
+          from_user_id=from_user.id,
+          from_user_name=from_user.user_name,
+          to_user_name='robotman',
+          to_user_id='666')
+        self.processor.process_mentions()
+        assert not mock_tasks.send_bad_balance.delay.called
